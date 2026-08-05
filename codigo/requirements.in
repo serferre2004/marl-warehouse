@@ -1,0 +1,8 @@
+torch
+gymnasium
+numpy
+matplotlib
+tensorboard
+pettingzoo
+
+-e ./robotic-warehouse

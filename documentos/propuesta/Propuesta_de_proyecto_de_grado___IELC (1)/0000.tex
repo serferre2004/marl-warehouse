@@ -1,0 +1,221 @@
+\documentclass[letterpaper]{article}
+\usepackage{calc,amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[french,spanish]{babel}
+\usepackage[x11names]{xcolor}
+
+\usepackage[fancyhdr]{geometry}
+\usepackage{enumitem,hyperref}
+\usepackage{float}
+\hypersetup{colorlinks=true,allcolors=blue,pdftitle=1,pdfauthor=Mauricio Guerrero}
+\documentclass[letterpaper]{article}
+\usepackage{calc,amsmath,amssymb,amsfonts}
+ \usepackage{graphicx} 
+\usepackage[T1]{fontenc}
+\usepackage{pgfgantt}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\renewcommand{\arraystretch}{1.1} % Aumenta el alto de las filas
+
+\usepackage[margin=1in]{geometry}
+\usepackage[french,spanish]{babel}
+\usepackage{xcolor,fancyhdr}
+\usepackage[vmargin=0.3937in,left=1.1811in,right=0.9846in,includeheadfoot,head=0.4925in,headsep=0.4528in,foot=0.4925in,footskip=0.9453in]{geometry}
+\usepackage{enumitem,hyperref}
+\hypersetup{colorlinks=true,allcolors=blue,pdftitle=1,pdfauthor=Mauricio Guerrero}
+% Outline numbering
+\setcounter{secnumdepth}{5}
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\arabic{section}.\arabic{subsection}}
+\renewcommand\thesubsubsection{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\renewcommand\theparagraph{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.\arabic{paragraph}}
+\renewcommand\thesubparagraph{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.\arabic{paragraph}.\arabic{subparagraph}}
+% Pages
+\fancypagestyle{Convertedi}{\fancyhf{}
+  \fancyhead[R]{}
+  \fancyfoot[L]{}
+  \renewcommand\headrulewidth{0pt}
+  \renewcommand\footrulewidth{0pt}
+  \renewcommand\thepage{\arabic{page}}
+}
+\fancypagestyle{Standard}{\fancyhf{}
+  \fancyhead[L]{\hfill \hfill \hfill \hfill \thepage{}}
+  \fancyfoot[L]{}
+  \renewcommand\headrulewidth{0pt}
+  \renewcommand\footrulewidth{0pt}
+  \renewcommand\thepage{\arabic{page}}
+}
+\fancypagestyle{FirstPage}{\fancyhf{}
+  \fancyhead[L]{}
+  \fancyfoot[L]{}
+  \renewcommand\headrulewidth{0pt}
+  \renewcommand\footrulewidth{0pt}
+  \renewcommand\thepage{\arabic{page}}
+}
+\pagestyle{Standard}
+\title{1}
+\author{Mauricio Guerrero}
+\date{2010-11-17}
+\begin{document}
+\clearpage
+\pagestyle{Standard}
+\thispagestyle{FirstPage}
+\setcounter{page}{1}
+{\selectlanguage{french}
+\foreignlanguage{spanish}
+
+
+\bigskip
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{PROPUESTA PROYECTO FIN DE CARRERA}}
+\par}
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{Presentado a}
+\par}
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{LA UNIVERSIDAD DE LOS ANDES}}
+\par}
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{FACULTAD DE INGENIERÍA}}
+\par}
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{DEPARTAMENTO DE INGENIERÍA ELÉCTRICA Y ELECTRÓNICA}}
+\par}
+
+
+\bigskip
+
+
+\bigskip
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{Para obtener el título de}
+\par}
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{INGENIERO ELECTRÓNICO}}
+\par}
+
+
+\bigskip
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{por }
+\par}
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{\textit{Sergio Andrés Arroyo Cruzco}}}
+\par}
+
+
+\bigskip
+
+
+\bigskip
+
+
+\bigskip
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}{\textbf{\textit{Propuesta de lazo de control de un convertidor DC DC bidireccional en configuración interleaved usando HIL}}}
+\par}
+
+
+\bigskip
+
+
+\bigskip
+
+
+\bigskip
+
+{\centering\selectlanguage{french}
+\foreignlanguage{spanish}
+\par}
+
+
+\bigskip
+
+
+\bigskip
+
+
+
+
+\bigskip
+
+
+\bigskip
+
+{\selectlanguage{spanish}
+\foreignlanguage{spanish}{\textit{{}-\ \ \ \ Asesor}}\foreignlanguage{spanish}{:\ \ \ \ \ Guillermo Andres Jimenez Estevez, Profesor
+Asociado, Universidad de Los Andes}}
+
+
+
+\clearpage
+\pagestyle{Convertedi}
+{\selectlanguage{spanish}\bfseries\color[HTML]{365F91}
+\foreignlanguage{spanish}{{Contenido}}
+
+\setcounter{tocdepth}{3}
+\tableofcontents}
+
+\input{sections/1.caracterizacion-problema}
+\input{sections/2.marco-teorico}
+\input{sections/3.caracterizacion-proyecto}
+\input{sections/4.contexto}
+\input{sections/5.cronogramas}
+\input{sections/6.recursos}
+
+
+
+
+
+
+\section*{Anexos}
+
+
+\begin{itemize}
+    \item Presentación de propuesta de grado firmada por el asesor académico, profesor Guillermo Jiménez.
+    \item Autorización de uso del trabajo a favor de la Universidad de los Andes.
+\end{itemize}
+
+
+\renewcommand{\refname}{Referencias}
+\bibliographystyle{IEEEtran}
+\bibliography{bibliografia} % Reemplaza tureferencias por el nombre real de tu archivo .bib
+
+\end{document}
+
+
