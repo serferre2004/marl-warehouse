@@ -698,15 +698,14 @@ class Warehouse(gym.Env):
             if id_ == 0:
                 obs["sensors"][i]["has_agent"] = [0]
                 obs["sensors"][i]["direction"] = 0
-                obs["sensors"][i]["local_message"] = (
-                    self.msg_bits * [0] if self.msg_bits > 0 else None
-                )
+                if self.msg_bits > 0:
+                    obs["sensors"][i]["local_message"] = self.msg_bits * [0]
             else:
                 obs["sensors"][i]["has_agent"] = [1]
                 obs["sensors"][i]["direction"] = self.agents[id_ - 1].dir.value
-                obs["sensors"][i]["local_message"] = (
-                    self.agents[id_ - 1].message if self.msg_bits > 0 else None
-                )
+                if self.msg_bits > 0:
+                    obs["sensors"][i]["local_message"] = self.agents[id_ - 1].message
+                
 
         # find neighboring shelfs:
         for i, id_ in enumerate(shelfs):

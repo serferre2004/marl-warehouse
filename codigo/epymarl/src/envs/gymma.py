@@ -10,19 +10,19 @@ from .multiagentenv import MultiAgentEnv
 from .wrappers import FlattenObservation
 import envs.pretrained as pretrained  # noqa
 
-try:
-    from .pz_wrapper import PettingZooWrapper  # noqa
-except ImportError:
-    warnings.warn(
-        "PettingZoo is not installed, so these environments will not be available! To install, run `pip install pettingzoo`"
-    )
+# try:
+#     from .pz_wrapper import PettingZooWrapper  # noqa
+# except ImportError:
+#     warnings.warn(
+#         "PettingZoo is not installed, so these environments will not be available! To install, run `pip install pettingzoo`"
+#     )
 
-try:
-    from .vmas_wrapper import VMASWrapper  # noqa
-except ImportError:
-    warnings.warn(
-        "VMAS is not installed, so these environments will not be available! To install, run `pip install 'vmas[gymnasium]'`"
-    )
+# try:
+#     from .vmas_wrapper import VMASWrapper  # noqa
+# except ImportError:
+#     warnings.warn(
+#         "VMAS is not installed, so these environments will not be available! To install, run `pip install 'vmas[gymnasium]'`"
+#     )
 
 
 class GymmaWrapper(MultiAgentEnv):
@@ -48,7 +48,7 @@ class GymmaWrapper(MultiAgentEnv):
         self._obs = None
         self._info = None
 
-        self.longest_action_space = max(self._env.action_space, key=lambda x: x.n)
+        self.longest_action_space = max(self._env.action_space, key=self._action_space_size)
         self.longest_observation_space = max(
             self._env.observation_space, key=lambda x: x.shape
         )
@@ -83,12 +83,13 @@ class GymmaWrapper(MultiAgentEnv):
 
     def step(self, actions):
         """Returns obss, reward, terminated, truncated, info"""
-        actions = [int(a) for a in actions]
+        actions = [self._decode_action(agent_id, int(action)) for agent_id, action in enumerate(actions)]
         obs, reward, done, truncated, self._info = self._env.step(actions)
         self._obs = self._pad_observation(obs)
 
         if self.common_reward and isinstance(reward, Iterable):
             reward = float(self.reward_agg_fn(reward))
+
         elif not self.common_reward and not isinstance(reward, Iterable):
             warnings.warn(
                 "common_reward is False but received scalar reward from the environment, returning reward as is"
@@ -127,15 +128,14 @@ class GymmaWrapper(MultiAgentEnv):
         return avail_actions
 
     def get_avail_agent_actions(self, agent_id):
-        """Returns the available actions for agent_id"""
-        valid = flatdim(self._env.action_space[agent_id]) * [1]
-        invalid = [0] * (self.longest_action_space.n - len(valid))
-        return valid + invalid
-
+        valid = self._action_space_size(self._env.action_space[agent_id])
+        total = self._action_space_size(self.longest_action_space)
+        invalid = total - valid
+        return [1] * valid + [0] * invalid
+    
     def get_total_actions(self):
-        """Returns the total number of actions an agent could ever take"""
-        # TODO: This is only suitable for a discrete 1 dimensional action space for each agent
-        return flatdim(self.longest_action_space)
+        """Returns the total number of discrete actions."""
+        return self._action_space_size(self.longest_action_space)
 
     def reset(self, seed=None, options=None):
         """Returns initial observations and info"""
@@ -157,3 +157,38 @@ class GymmaWrapper(MultiAgentEnv):
 
     def get_stats(self):
         return {}
+
+    def _action_space_size(self, space):
+        if hasattr(space, "n"):
+            return space.n
+        elif hasattr(space, "nvec"):
+            return int(np.prod(space.nvec))
+        else:
+            raise TypeError(
+                f"Unsupported action space type: {type(space)}"
+            )
+
+    def _decode_action(self, agent_id, action):
+        space = self._env.action_space[agent_id]
+
+        if hasattr(space, "n"):
+            return action
+
+        if hasattr(space, "nvec"):
+            nvec = space.nvec
+            total_actions = int(np.prod(nvec))
+
+            if action < 0 or action >= total_actions:
+                raise ValueError(
+                    f"Invalid action {action} for agent {agent_id}. "
+                    f"Expected range [0, {total_actions - 1}]"
+                )
+
+            return np.array(
+                np.unravel_index(action, tuple(nvec)),
+                dtype=np.int64,
+            )
+
+        raise TypeError(
+            f"Unsupported action space type: {type(space)}"
+        )

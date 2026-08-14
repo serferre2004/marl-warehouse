@@ -1,2 +1,0 @@
-C:\Users\sergi\OneDrive - Universidad de los Andes\Documentos\Sergio Ferreira\Tesis\codigo\.venv\Lib\site-packages\sacred\dependencies.py:11: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources

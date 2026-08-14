@@ -20,7 +20,7 @@ from utils.logging import get_logger
 from run import run
 
 SETTINGS["CAPTURE_MODE"] = (
-    "fd"  # set to "no" if you want to see stdout/stderr in console
+    "no"  # set to "no" if you want to see stdout/stderr in console
 )
 logger = get_logger()
 
@@ -28,7 +28,10 @@ ex = Experiment("pymarl")
 ex.logger = logger
 ex.captured_out_filter = apply_backspaces_and_linefeeds
 
-results_path = os.path.join(dirname(dirname(abspath(__file__))), "results")
+results_path = os.environ.get(
+    "EPYMARL_RESULTS_PATH",
+    os.path.join(dirname(dirname(abspath(__file__))), "results")
+)
 # results_path = "/home/ubuntu/data"
 
 

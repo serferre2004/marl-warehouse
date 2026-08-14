@@ -3,7 +3,6 @@ Resumen ejecutivo: Proponemos un protocolo detallado para la fase experimental e
 
 ## Algoritmos
 
-- IQL
 - IA2C
 - MAA2C
 - MAPPO
@@ -29,6 +28,13 @@ EpyMARL
 | Frecuencia de evaluación | 5e3 |
 | Número de episodios | 50 |
 | Protocolo de sintonización | Random search |
+
+Semillas:
+* 3
+* 22
+* 42
+* 138
+* 2026
 
 ## Sintonización de hiperparámetros
 
