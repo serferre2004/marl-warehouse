@@ -147,3 +147,58 @@
     if self.msg_bits > 0:
         obs["sensors"][i]["local_message"] = self.agents[id_ - 1].message
     ```
+
+
+*2026-08-17*
+### Archivo `rware/warehouse.py`
+- Para acelerar el aprendizaje se transforma el TWO_STAGE reward type por THREE_STAGE reward type en el que la recompensa a cada agente se entrega al recoger la estantería solicitada, entregarla y al dejarla en un espacio libre. Para evitar *reward hacking* se penaliza soltar una estantería solicitada sin haberla entregado.
+    ``` python
+    # Enumeración RewardType
+    class RewardType(Enum):
+        GLOBAL = 0
+        INDIVIDUAL = 1
+        THREE_STAGE = 2
+
+    # Método step
+    elif agent.req_action == Action.TOGGLE_LOAD and not agent.carrying_shelf:
+        shelf_id = self.grid[_LAYER_SHELFS, agent.y, agent.x]
+        if shelf_id:
+            agent.carrying_shelf = self.shelfs[shelf_id - 1]
+            # Three stage reward for carrying a requested shelf
+            if self.shelfs[shelf_id - 1] in self.request_queue and self.reward_type == RewardType.THREE_STAGE:
+                rewards[agent.id - 1] += 0.3
+    elif agent.req_action == Action.TOGGLE_LOAD and agent.carrying_shelf:
+        if not self._is_highway(agent.x, agent.y):
+            agent.carrying_shelf = None
+            # We cancel the first stage reward to avoid reward hacking (self.grid x and y coordinates are inverted)
+            shelf_id = self.grid[_LAYER_SHELFS, agent.y, agent.x]
+            if self.shelfs[shelf_id - 1] in self.request_queue and self.reward_type == RewardType.THREE_STAGE:
+                rewards[agent.id - 1] -= 0.3
+            if agent.has_delivered and self.reward_type == RewardType.THREE_STAGE:
+                rewards[agent.id - 1] += 0.3
+
+            agent.has_delivered = False
+
+    # Método step
+    shelf_delivered = True
+    # remove from queue and replace it
+    candidates = [s for s in self.shelfs if s not in self.request_queue]
+    new_request = self.np_random.choice(candidates)
+    self.request_queue[self.request_queue.index(shelf)] = new_request
+    # also reward the agents
+    if self.reward_type == RewardType.GLOBAL:
+        rewards += 1
+    elif self.reward_type == RewardType.INDIVIDUAL:
+        agent_id = self.grid[_LAYER_AGENTS, x, y]
+        rewards[agent_id - 1] += 1
+    elif self.reward_type == RewardType.THREE_STAGE:
+        agent_id = self.grid[_LAYER_AGENTS, x, y]
+        self.agents[agent_id - 1].has_delivered = True
+        rewards[agent_id - 1] += 0.4
+    ```
+
+- Para que se pueda pasar el reward_type como parámetro del comando se añade una transformación a la enumeración en Warehouse.__init__
+    ``` python
+    reward_type = RewardType[reward_type]
+    self.reward_type = reward_type
+    ```

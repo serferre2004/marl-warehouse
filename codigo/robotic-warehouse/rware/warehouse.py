@@ -46,7 +46,7 @@ class Direction(Enum):
 class RewardType(Enum):
     GLOBAL = 0
     INDIVIDUAL = 1
-    TWO_STAGE = 2
+    THREE_STAGE = 2
 
 
 class ObservationType(Enum):
@@ -243,6 +243,7 @@ class Warehouse(gym.Env):
         self.msg_bits = msg_bits
         self.sensor_range = sensor_range
         self.max_inactivity_steps: Optional[int] = max_inactivity_steps
+        reward_type = RewardType[reward_type]
         self.reward_type = reward_type
         self.reward_range = (0, 1)
 
@@ -893,11 +894,18 @@ class Warehouse(gym.Env):
                 shelf_id = self.grid[_LAYER_SHELFS, agent.y, agent.x]
                 if shelf_id:
                     agent.carrying_shelf = self.shelfs[shelf_id - 1]
+                    # Three stage reward for carrying a requested shelf
+                    if self.shelfs[shelf_id - 1] in self.request_queue and self.reward_type == RewardType.THREE_STAGE:
+                        rewards[agent.id - 1] += 0.3
             elif agent.req_action == Action.TOGGLE_LOAD and agent.carrying_shelf:
                 if not self._is_highway(agent.x, agent.y):
                     agent.carrying_shelf = None
-                    if agent.has_delivered and self.reward_type == RewardType.TWO_STAGE:
-                        rewards[agent.id - 1] += 0.5
+                    # We cancel the first stage reward to avoid reward hacking (self.grid x and y coordinates are inverted)
+                    shelf_id = self.grid[_LAYER_SHELFS, agent.y, agent.x]
+                    if self.shelfs[shelf_id - 1] in self.request_queue and self.reward_type == RewardType.THREE_STAGE:
+                        rewards[agent.id - 1] -= 0.3
+                    if agent.has_delivered and self.reward_type == RewardType.THREE_STAGE:
+                        rewards[agent.id - 1] += 0.3
 
                     agent.has_delivered = False
 
@@ -924,10 +932,10 @@ class Warehouse(gym.Env):
             elif self.reward_type == RewardType.INDIVIDUAL:
                 agent_id = self.grid[_LAYER_AGENTS, x, y]
                 rewards[agent_id - 1] += 1
-            elif self.reward_type == RewardType.TWO_STAGE:
+            elif self.reward_type == RewardType.THREE_STAGE:
                 agent_id = self.grid[_LAYER_AGENTS, x, y]
                 self.agents[agent_id - 1].has_delivered = True
-                rewards[agent_id - 1] += 0.5
+                rewards[agent_id - 1] += 0.4
 
         if shelf_delivered:
             self._cur_inactive_steps = 0
