@@ -103,6 +103,7 @@ def main():
         f"gamma={config['gamma']}",
         f"lr={config['lr']}",
         f"batch_size={config['batch_size']}",
+        f"batch_size_run={config['batch_size_run']}",
         f"buffer_size={config['buffer_size']}",
         f"hidden_dim={config['hidden_dim']}",
         f"grad_norm_clip={config['grad_norm_clip']}",

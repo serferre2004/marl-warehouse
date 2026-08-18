@@ -29,7 +29,7 @@ reward:
 evaluation:
   enabled: true
   interval: 100000
-  episodes: 10
+  episodes: 100
 
 logging:
   runner_interval: 4000
@@ -48,13 +48,15 @@ results:
 agent: "rnn"
 hidden_dim: 128 # Size of hidden state for default rnn agent
 obs_agent_id: True # Include the agent's one_hot id in the observation
+obs_last_action: True
 
 
 # --- RL hyperparameters ---
 gamma: 0.99
-batch_size: 10 # Number of episodes to train on
-buffer_size: 10 # Size of the replay buffer
-lr: 0.0005 # Learning rate for agents
+batch_size: 16 # Number of episodes to train on
+batch_size_run: 16
+buffer_size: 16 # Size of the replay buffer
+lr: 0.0002 # Learning rate for agents
 optim_alpha: 0.99 # RMSProp alpha
 optim_eps: 0.00001 # RMSProp epsilon
 grad_norm_clip: 10 # Reduce magnitude of gradients above this L2 norm
