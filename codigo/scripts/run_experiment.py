@@ -58,6 +58,8 @@ def main():
         "--env-config=gymma",
         "with",
 
+        f"common_reward={str(config['reward']['common']).capitalize()}",
+
         # Environment
         f"env_args.key={key}",
         f"env_args.time_limit={config['time_limit']}",
@@ -74,6 +76,9 @@ def main():
         # Training
         f"runner={config['runner']}",
         f"t_max={config['training']['timesteps']}",
+        f"reward_scalarisation={config['reward']['scalarisation']}",
+        f"obs_agent_id={str(config['obs_agent_id']).lower()}",
+        f"obs_last_action={str(config['obs_last_action']).lower()}",
 
         # Logging
         f"runner_log_interval={config['logging']['runner_interval']}",

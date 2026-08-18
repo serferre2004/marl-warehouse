@@ -199,6 +199,7 @@
 
 - Para que se pueda pasar el reward_type como parámetro del comando se añade una transformación a la enumeración en Warehouse.__init__
     ``` python
-    reward_type = RewardType[reward_type]
+    if type(reward_type) == str:
+        reward_type = RewardType[reward_type]
     self.reward_type = reward_type
     ```

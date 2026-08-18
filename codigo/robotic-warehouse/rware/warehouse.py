@@ -243,7 +243,8 @@ class Warehouse(gym.Env):
         self.msg_bits = msg_bits
         self.sensor_range = sensor_range
         self.max_inactivity_steps: Optional[int] = max_inactivity_steps
-        reward_type = RewardType[reward_type]
+        if type(reward_type) == str:
+            reward_type = RewardType[reward_type]
         self.reward_type = reward_type
         self.reward_range = (0, 1)
 
