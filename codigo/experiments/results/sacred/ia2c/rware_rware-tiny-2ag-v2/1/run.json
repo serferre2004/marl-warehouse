@@ -1,0 +1,202 @@
+{
+  "artifacts": [],
+  "command": "my_main",
+  "experiment": {
+    "base_dir": "/home/sferreiraa/marl-warehouse/codigo/epymarl/src",
+    "dependencies": [
+      "numpy==2.4.6",
+      "pyyaml==6.0.3",
+      "sacred==0.8.7",
+      "torch==2.13.0"
+    ],
+    "mainfile": "main.py",
+    "name": "pymarl",
+    "repositories": [
+      {
+        "commit": "567480b4e3feb293bea6552333c03c91bb8d4479",
+        "dirty": true,
+        "url": "https://github.com/serferre2004/marl-warehouse.git"
+      },
+      {
+        "commit": "567480b4e3feb293bea6552333c03c91bb8d4479",
+        "dirty": true,
+        "url": "https://github.com/serferre2004/marl-warehouse.git"
+      },
+      {
+        "commit": "567480b4e3feb293bea6552333c03c91bb8d4479",
+        "dirty": true,
+        "url": "https://github.com/serferre2004/marl-warehouse.git"
+      }
+    ],
+    "sources": [
+      [
+        "main.py",
+        "_sources/main_7b2bdd8eb080291748e1706722ee8a73.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_fc9c38df5b102b48f85215c1eaa9f10d.py"
+      ],
+      [
+        "utils/logging.py",
+        "_sources/logging_80685d67fab61f6e71e93fbe28085531.py"
+      ]
+    ]
+  },
+  "heartbeat": "2026-08-18T02:55:10.820902",
+  "host": {
+    "ENV": {},
+    "cpu": "Intel(R) Xeon(R) Silver 4310 CPU @ 2.10GHz",
+    "gpus": {
+      "driver_version": "560.35.03",
+      "gpus": [
+        {
+          "model": "NVIDIA A40",
+          "persistence_mode": true,
+          "total_memory": 46068
+        },
+        {
+          "model": "NVIDIA A40",
+          "persistence_mode": true,
+          "total_memory": 46068
+        },
+        {
+          "model": "NVIDIA A40",
+          "persistence_mode": true,
+          "total_memory": 46068
+        },
+        {
+          "model": "NVIDIA A40",
+          "persistence_mode": true,
+          "total_memory": 46068
+        }
+      ]
+    },
+    "hostname": "ml-server03",
+    "os": [
+      "Linux",
+      "Linux-5.15.0-173-generic-x86_64-with-glibc2.35"
+    ],
+    "python_version": "3.12.13"
+  },
+  "meta": {
+    "command": "my_main",
+    "config_updates": {
+      "action_selector": "soft_policies",
+      "agent": "rnn",
+      "agent_output_type": "pi_logits",
+      "batch_size": 32,
+      "buffer_size": 1024,
+      "critic_type": "ac_critic_ns",
+      "entropy_coef": 0.01,
+      "env_args": {
+        "key": "rware:rware-tiny-2ag-v2",
+        "max_steps": 20000,
+        "msg_bits": 0,
+        "observation_type": "FLATTENED",
+        "request_queue_size": 2,
+        "reward_type": "THREE_STAGE",
+        "sensor_range": 1,
+        "time_limit": 20000
+      },
+      "evaluate": "true",
+      "gamma": 0.99,
+      "grad_norm_clip": 10,
+      "hidden_dim": 64,
+      "learner": "actor_critic_learner",
+      "learner_log_interval": 4000,
+      "local_results_path": "/home/sferreiraa/marl-warehouse/codigo/experiments/results",
+      "log_interval": 4000,
+      "lr": 0.0005,
+      "mask_before_softmax": "true",
+      "optim_alpha": 0.99,
+      "optim_eps": 1e-05,
+      "q_nstep": 5,
+      "runner": "parallel",
+      "runner_log_interval": 4000,
+      "save_model": "true",
+      "save_model_interval": 200000,
+      "seed": 3,
+      "standardise_returns": "false",
+      "standardise_rewards": "true",
+      "t_max": 20000000,
+      "target_update_interval_or_tau": 200,
+      "test_interval": 10000,
+      "test_nepisode": 10,
+      "use_rnn": "false"
+    },
+    "named_configs": [],
+    "options": {
+      "--beat-interval": null,
+      "--capture": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--id": null,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print-config": false,
+      "--priority": null,
+      "--queue": false,
+      "--s3": null,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "env_args.key=rware:rware-tiny-2ag-v2",
+        "env_args.time_limit=20000",
+        "env_args.request_queue_size=2",
+        "env_args.sensor_range=1",
+        "env_args.msg_bits=0",
+        "env_args.reward_type=THREE_STAGE",
+        "env_args.observation_type=FLATTENED",
+        "env_args.max_steps=20000",
+        "seed=3",
+        "runner=parallel",
+        "t_max=20000000",
+        "runner_log_interval=4000",
+        "learner_log_interval=4000",
+        "log_interval=4000",
+        "save_model=true",
+        "save_model_interval=200000",
+        "evaluate=true",
+        "test_interval=10000",
+        "test_nepisode=10",
+        "local_results_path=/home/sferreiraa/marl-warehouse/codigo/experiments/results",
+        "gamma=0.99",
+        "lr=0.0005",
+        "batch_size=32",
+        "buffer_size=1024",
+        "hidden_dim=64",
+        "grad_norm_clip=10",
+        "optim_alpha=0.99",
+        "optim_eps=1e-05",
+        "entropy_coef=0.01",
+        "use_rnn=false",
+        "q_nstep=5",
+        "action_selector=soft_policies",
+        "mask_before_softmax=true",
+        "target_update_interval_or_tau=200",
+        "agent=rnn",
+        "agent_output_type=pi_logits",
+        "learner=actor_critic_learner",
+        "standardise_returns=false",
+        "standardise_rewards=true",
+        "critic_type=ac_critic_ns"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2026-08-17T19:05:23.542214",
+  "status": "COMPLETED",
+  "stop_time": "2026-08-18T02:55:10.820585"
+}

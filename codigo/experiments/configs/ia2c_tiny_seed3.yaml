@@ -17,7 +17,7 @@ environment:
   sensor_range: 1
   msg_bits: 0
 
-  reward_type: GLOBAL
+  reward_type: THREE_STAGE
   observation_type: FLATTENED
 
 

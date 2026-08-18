@@ -94,5 +94,7 @@ typing-extensions==4.16.0
 werkzeug==3.1.8
     # via tensorboard
 
+sacred
+
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
