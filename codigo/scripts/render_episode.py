@@ -81,11 +81,11 @@ def main():
     # ---------------------------------------------------------------
 
     n_agents = 2
-    hidden_dim = 64
+    hidden_dim = 128
     use_rnn = True
 
     obs_agent_id = True
-    obs_last_action = False
+    obs_last_action = True
 
     # tiny-2ag
     env = gym.make(
