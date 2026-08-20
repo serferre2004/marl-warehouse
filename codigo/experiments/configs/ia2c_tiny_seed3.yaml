@@ -56,7 +56,7 @@ gamma: 0.99
 batch_size: 16 # Number of episodes to train on
 batch_size_run: 16
 buffer_size: 16 # Size of the replay buffer
-lr: 0.0005 # Learning rate for agents
+lr: 0.0004   # Learning rate for agents
 optim_alpha: 0.99 # RMSProp alpha
 optim_eps: 0.00001 # RMSProp epsilon
 grad_norm_clip: 5 # Reduce magnitude of gradients above this L2 norm
@@ -72,12 +72,12 @@ mask_before_softmax: True
 runner: "parallel"
 
 # update the target network every {} training steps
-target_update_interval_or_tau: 0.01
+target_update_interval_or_tau: 0.001
 
 agent_output_type: "pi_logits"
 learner: "actor_critic_learner"
 standardise_returns: False
-standardise_rewards: True
+standardise_rewards: False
 use_rnn: True
 q_nstep: 5 # 1 corresponds to normal r + gammaV
 critic_type: "ac_critic"
