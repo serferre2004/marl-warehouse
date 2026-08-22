@@ -40,6 +40,7 @@ RUNNER = PROJECT_ROOT / "scripts" / "run_experiment.py"
 
 SEARCH_DIR = PROJECT_ROOT / "experiments" / "random_search"
 CONFIG_DIR = SEARCH_DIR / "configs"
+SEARCH_RESULTS_DIR = SEARCH_DIR / "results"
 RESULTS_CSV = SEARCH_DIR / "random_search_results.csv"
 
 
@@ -182,15 +183,8 @@ def extract_metrics_from_json(obj, prefix=""):
 
 
 def collect_result_information(search_root, trial_start_time):
-    """
-    Busca JSON producidos por EPyMARL y devuelve:
-      - archivos encontrados
-      - métricas numéricas agregadas
-      - algunas series/metricas reconocibles
-    """
-    files = find_json_files(search_root)
+    files = sorted(search_root.rglob("metrics.json")) if search_root.exists() else []
 
-    # Preferir archivos modificados durante este trial.
     recent = []
     for path in files:
         try:
@@ -200,60 +194,43 @@ def collect_result_information(search_root, trial_start_time):
             pass
 
     candidates = recent or files
+    if not candidates:
+        return {
+            "result_files": "",
+            "metrics": {},
+        }
 
-    merged = {}
-    selected_files = []
+    metrics_path = max(candidates, key=lambda path: path.stat().st_mtime)
+    obj = load_json(metrics_path)
+    if not isinstance(obj, dict):
+        return {
+            "result_files": str(metrics_path.relative_to(PROJECT_ROOT)),
+            "metrics": {},
+        }
 
-    # Métricas que queremos identificar explícitamente si existen.
-    aliases = {
-        "test_return_mean": [
-            "test_return_mean",
-            "return_mean",
-            "test_return",
-        ],
-        "episode_length_mean": [
-            "ep_length_mean",
-            "episode_length_mean",
-        ],
-        "test_ep_length_mean": [
-            "test_ep_length_mean",
-        ],
-    }
+    metric = obj.get("test_return_mean", {})
+    values = numeric_values(metric.get("values", [])) if isinstance(metric, dict) else []
+    steps = metric.get("steps", []) if isinstance(metric, dict) else []
 
-    explicit = {}
+    metrics = {}
+    summary = summarize(values)
+    if summary:
+        max_idx = max(range(len(values)), key=lambda idx: values[idx])
+        metrics = {
+            "test_return_mean_max": summary["max"],
+            "test_return_mean_mean": summary["mean"],
+            "test_return_mean_std": summary["std"],
+            "test_return_mean_count": summary["count"],
+            "test_return_mean_last": values[-1],
+        }
 
-    for path in candidates:
-        obj = load_json(path)
-        if obj is None:
-            continue
+        if max_idx < len(steps):
+            metrics["test_return_mean_max_step"] = steps[max_idx]
 
-        selected_files.append(str(path.relative_to(PROJECT_ROOT)))
-
-        flat = extract_metrics_from_json(obj)
-
-        # Conservamos las métricas numéricas con un prefijo basado en el archivo.
-        stem = path.stem
-        for key, value in flat.items():
-            merged[f"{stem}__{key}"] = value
-
-        # Buscar aliases de forma flexible.
-        lower_map = {k.lower(): v for k, v in flat.items()}
-        for target, possible in aliases.items():
-            for candidate in possible:
-                for key, value in lower_map.items():
-                    if key.endswith(candidate.lower()):
-                        explicit[target] = value
-                        break
-                if target in explicit:
-                    break
-
-    # Evitar que el CSV se vuelva inmanejable por duplicación accidental.
     return {
-        "result_files": ";".join(selected_files),
-        "metrics": merged,
-        "explicit": explicit,
+        "result_files": str(metrics_path.relative_to(PROJECT_ROOT)),
+        "metrics": metrics,
     }
-
 
 # ---------------------------------------------------------------------------
 # YAML
@@ -270,6 +247,8 @@ def build_yaml(base_yaml_path, trial_id, hp, timesteps, seed, time_limit):
 
     config.setdefault("training", {})
     config["training"]["timesteps"] = timesteps
+    config.setdefault("results", {})
+    config["results"]["path"] = str(SEARCH_RESULTS_DIR.relative_to(PROJECT_ROOT))
 
     for key, value in hp.items():
         config[key] = value
@@ -435,13 +414,9 @@ def main():
         for key, value in hp.items():
             row[f"hp_{key}"] = value
 
-        # Métricas reconocibles.
-        for key, value in result_info["explicit"].items():
-            row[key] = value
-
         # Todas las métricas numéricas encontradas.
         for key, value in result_info["metrics"].items():
-            row[f"metric_{key}"] = value
+            row[f"{key}"] = value
 
         row["result_files"] = result_info["result_files"]
 
