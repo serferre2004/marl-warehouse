@@ -1,0 +1,618 @@
+{
+  "ep_length_mean": [
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0
+  ],
+  "ep_length_mean_T": [
+    32000,
+    64000,
+    96000,
+    128000,
+    160000,
+    192000,
+    224000,
+    256000,
+    288000,
+    320000,
+    352000,
+    384000,
+    416000,
+    448000,
+    480000,
+    512000,
+    544000,
+    576000,
+    608000,
+    640000,
+    672000,
+    704000,
+    736000,
+    768000,
+    800000,
+    832000
+  ],
+  "episode": [
+    16,
+    32,
+    48,
+    64,
+    80,
+    96,
+    112,
+    128,
+    144,
+    160,
+    176,
+    192,
+    208,
+    224,
+    240,
+    256,
+    272,
+    288,
+    304,
+    320,
+    336,
+    352,
+    368,
+    384,
+    400,
+    416
+  ],
+  "episode_T": [
+    32000,
+    64000,
+    96000,
+    128000,
+    160000,
+    192000,
+    224000,
+    256000,
+    288000,
+    320000,
+    352000,
+    384000,
+    416000,
+    448000,
+    480000,
+    512000,
+    544000,
+    576000,
+    608000,
+    640000,
+    672000,
+    704000,
+    736000,
+    768000,
+    800000,
+    832000
+  ],
+  "episode_collisions_mean": [
+    12.375,
+    8.3125,
+    12.8125,
+    9.8125,
+    13.75,
+    13.1875,
+    11.8125,
+    12.5625,
+    11.8125,
+    12.875,
+    13.375,
+    12.5,
+    9.0,
+    13.375,
+    12.125,
+    12.75,
+    12.5,
+    11.4375,
+    15.0,
+    8.625,
+    15.3125,
+    12.875,
+    15.3125,
+    11.875,
+    10.6875,
+    12.125
+  ],
+  "episode_collisions_mean_T": [
+    32000,
+    64000,
+    96000,
+    128000,
+    160000,
+    192000,
+    224000,
+    256000,
+    288000,
+    320000,
+    352000,
+    384000,
+    416000,
+    448000,
+    480000,
+    512000,
+    544000,
+    576000,
+    608000,
+    640000,
+    672000,
+    704000,
+    736000,
+    768000,
+    800000,
+    832000
+  ],
+  "return_mean": [
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.1
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.23125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.19375
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.23125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.01875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0625
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.16875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.10625
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.08750000000000001
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.15
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.14375
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0625
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.1875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.08125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.175
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.10625
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.125
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.16875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.16875
+    }
+  ],
+  "return_mean_T": [
+    32000,
+    64000,
+    96000,
+    128000,
+    160000,
+    192000,
+    224000,
+    256000,
+    288000,
+    320000,
+    352000,
+    384000,
+    416000,
+    448000,
+    480000,
+    512000,
+    544000,
+    576000,
+    608000,
+    640000,
+    672000,
+    704000,
+    736000,
+    768000,
+    800000,
+    832000
+  ],
+  "return_std": [
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.31819805153394637
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.33071891388307384
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3720194047358283
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.4220022956098699
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3720194047358283
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.2883140648667699
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.07261843774138907
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.17984368212422697
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3565787956398978
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.23576670142325018
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.2712816801776338
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.31819805153394637
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3316035848720577
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.17984368212422697
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.0
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.23150323971815165
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3550968177835448
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.24803918541230535
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.39131189606246314
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.23576670142325018
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.33071891388307384
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.5021438414438636
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3720194047358283
+    }
+  ],
+  "return_std_T": [
+    32000,
+    64000,
+    96000,
+    128000,
+    160000,
+    192000,
+    224000,
+    256000,
+    288000,
+    320000,
+    352000,
+    384000,
+    416000,
+    448000,
+    480000,
+    512000,
+    544000,
+    576000,
+    608000,
+    640000,
+    672000,
+    704000,
+    736000,
+    768000,
+    800000,
+    832000
+  ],
+  "test_ep_length_mean": [
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0,
+    2000.0
+  ],
+  "test_ep_length_mean_T": [
+    32000,
+    160000,
+    288000,
+    416000,
+    544000,
+    672000,
+    800000
+  ],
+  "test_episode_collisions_mean": [
+    11.1875,
+    12.614583333333334,
+    11.833333333333334,
+    13.447916666666666,
+    13.09375,
+    14.697916666666666,
+    12.583333333333334
+  ],
+  "test_episode_collisions_mean_T": [
+    32000,
+    160000,
+    288000,
+    416000,
+    544000,
+    672000,
+    800000
+  ],
+  "test_return_mean": [
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.13749999999999998
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.14791666666666667
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.09166666666666667
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.121875
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.14166666666666664
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.10208333333333335
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.20104166666666667
+    }
+  ],
+  "test_return_mean_T": [
+    32000,
+    160000,
+    288000,
+    416000,
+    544000,
+    672000,
+    800000
+  ],
+  "test_return_std": [
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3276335605520289
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3657125370044377
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.2834558558615825
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.3129840001901056
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.32553374974374355
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.264172910020859
+    },
+    {
+      "dtype": "float64",
+      "py/object": "numpy.float64",
+      "value": 0.38554474223349083
+    }
+  ],
+  "test_return_std_T": [
+    32000,
+    160000,
+    288000,
+    416000,
+    544000,
+    672000,
+    800000
+  ]
+}

@@ -328,7 +328,7 @@ def main():
     parser.add_argument(
         "--base-yaml",
         type=Path,
-        default=PROJECT_ROOT / "configs" / "ia2c_tiny_seed3.yaml",
+        default=PROJECT_ROOT / "experiments" / "configs" / "ia2c_tiny_seed3.yaml",
     )
 
     parser.add_argument(
@@ -391,7 +391,6 @@ def main():
         command = [
             sys.executable,
             str(RUNNER),
-            "--config",
             str(trial_yaml),
         ]
 
