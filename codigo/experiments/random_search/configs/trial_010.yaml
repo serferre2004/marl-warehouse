@@ -1,0 +1,56 @@
+name: ia2c_random_trial_010
+algorithm: ia2c
+seed: 3
+time_limit: 2000
+training:
+  timesteps: 1500000
+environment:
+  key: rware:rware
+  scenario: tiny
+  n_agents: 2
+  request_queue_size: 2
+  sensor_range: 1
+  msg_bits: 0
+  reward_type: THREE_STAGE
+  observation_type: FLATTENED
+reward:
+  common: true
+  scalarisation: sum
+evaluation:
+  enabled: true
+  interval: 100000
+  episodes: 100
+logging:
+  runner_interval: 4000
+  learner_interval: 4000
+  general_interval: 4000
+checkpoint:
+  save: true
+  interval: 1000000
+results:
+  path: experiments/random_search/results
+agent: rnn
+hidden_dim: 256
+obs_agent_id: true
+obs_last_action: true
+gamma: 0.97
+batch_size: 32
+batch_size_run: 16
+buffer_size: 16
+lr: 0.0008977015075881433
+optim_alpha: 0.99
+optim_eps: 1.0e-05
+grad_norm_clip: 5
+add_value_last_step: true
+entropy_coef: 0.005345687533071822
+action_selector: soft_policies
+mask_before_softmax: true
+runner: parallel
+target_update_interval_or_tau: 0.001
+agent_output_type: pi_logits
+learner: actor_critic_learner
+standardise_returns: false
+standardise_rewards: false
+use_rnn: true
+q_nstep: 5
+critic_type: ac_critic
