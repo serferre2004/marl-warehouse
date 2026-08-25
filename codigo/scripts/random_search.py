@@ -391,7 +391,7 @@ def main():
         elapsed = finished - started
 
         result_info = collect_result_information(
-            PROJECT_ROOT / "experiments" / "results",
+            SEARCH_RESULTS_DIR,
             started,
         )
 
