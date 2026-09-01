@@ -74,11 +74,8 @@ def main():
         f"seed={config['seed']}",
 
         # Training
-        f"runner={config['runner']}",
         f"t_max={config['training']['timesteps']}",
         f"reward_scalarisation={config['reward']['scalarisation']}",
-        f"obs_agent_id={str(config['obs_agent_id']).lower()}",
-        f"obs_last_action={str(config['obs_last_action']).lower()}",
 
         # Logging
         f"runner_log_interval={config['logging']['runner_interval']}",
@@ -99,30 +96,16 @@ def main():
         f"local_results_path={results_path}",
     ]
 
-    command.extend([
-        f"gamma={config['gamma']}",
-        f"lr={config['lr']}",
-        f"batch_size={config['batch_size']}",
-        f"batch_size_run={config['batch_size_run']}",
-        f"buffer_size={config['buffer_size']}",
-        f"hidden_dim={config['hidden_dim']}",
-        f"grad_norm_clip={config['grad_norm_clip']}",
-        f"optim_alpha={config['optim_alpha']}",
-        f"optim_eps={config['optim_eps']}",
-        f"entropy_coef={config['entropy_coef']}",
-        f"use_rnn={str(config['use_rnn']).lower()}",
-        f"q_nstep={config['q_nstep']}",
-        f"action_selector={config['action_selector']}",
-        f"mask_before_softmax={str(config['mask_before_softmax']).lower()}",
-        f"target_update_interval_or_tau={config['target_update_interval_or_tau']}",
-        f"agent={config['agent']}",
-        f"agent_output_type={config['agent_output_type']}",
-        f"learner={config['learner']}",
-        f"standardise_returns={str(config['standardise_returns']).lower()}",
-        f"standardise_rewards={str(config['standardise_rewards']).lower()}",
-        f"critic_type={config['critic_type']}"
-    ])
+    keys_setted = ["algorithm", "environment", "training", "logging", "checkpoint", "evaluation", "reward", "results", "seed", "time_limit", "name"]
+    for key in keys_setted:
+        del config[key]
 
+    for key, value in config.items():
+        if value is None: continue
+        if isinstance(value, bool):
+            value = str(value).lower()
+        command.append(f"{key}={value}")
+    
     env = os.environ.copy()
     env["EPYMARL_RESULTS_PATH"] = str(results_path)
 

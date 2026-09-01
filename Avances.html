@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora de Tesis</title>
+<style>
+  :root {
+    --paper: #f5f2eb;
+    --paper-edge: #e7ddc6;
+    --ink: #2b2620;
+    --muted: #79705f;
+    --accent: #33564f;        /* verde bitácora, no terracota */
+    --accent-soft: #cddad2;
+    --rule-red: #a13d34;      /* línea de margen, tinta roja */
+    --spine: #b7a684;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #eeebe0;
+    color: var(--ink);
+    font-family: 'Inria Serif', Times, serif;
+    line-height: 1.65;
+  }
+
+  /* ---------- página de cuaderno ---------- */
+  .page {
+    position: relative;
+    max-width: 840px;
+    margin: 60px auto 80px;
+    background:
+      var(--paper);
+    border: 1px solid var(--paper-edge);
+    box-shadow: 0 10px 10px -2px rgba(43, 38, 32, 0.35);
+    padding: 56px 56px 64px 68px;
+  }
+
+
+  header {
+    margin-bottom: 44px;
+  }
+
+  .eyebrow {
+    font-style: italic;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-weight: 700;
+    font-size: 2.35rem;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+
+  .meta-line {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  .meta-line span strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ---------- secciones tipo "entrada" ---------- */
+  section {
+    margin-bottom: 46px;
+  }
+
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .entry-head .mark {
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--accent);
+  }
+
+  section h2 {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .subsection {
+    margin-left: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .subsection h3 {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+
+
+  .entry-head::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px dashed var(--line);
+    transform: translateY(-4px);
+  }
+
+  /* lista de tareas, casillas manuales */
+  ul.tasks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ul.tasks li {
+    position: relative;
+    padding: 7px 0 7px 30px;
+    font-size: 1rem;
+  }
+
+  ul.tasks li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    color: var(--accent);
+    font-size: 1rem;
+  }
+
+  /* zona para pegar resultados: hoja rayada dentro de la hoja */
+  .write-area {
+    min-height: 150px;
+    padding: 6px 4px 4px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .write-area p {
+    margin: 0 0px;
+    line-height: 34px;
+  }
+
+  .write-area p:last-child {
+    margin-bottom: 6px;
+  }
+
+  footer {
+    margin-top: 20px;
+    font-style: italic;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  @media (max-width: 640px) {
+    .page {
+      margin: 0;
+      padding: 44px 24px 56px 40px;
+      border: none;
+      box-shadow: none;
+    }
+    .margin-rule { left: 18px; }
+    h1 { font-size: 1.85rem; }
+    body { background: var(--paper); }
+  }
+
+  img {
+    margin: 0 auto;
+  }
+
+  video {
+    margin: 0 auto;
+  }
+
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="margin-rule"></div>
+
+    <header>
+      <h1>Avances de proyecto</h1>
+      <div class="meta-line">
+        <span>Sergio Ferreira</span>
+        <span>28 de Agosto</span>
+      </div>
+    </header>
+
+    <section>
+      <div class="entry-head">
+        <h2>Tareas realizadas</h2>
+      </div>
+      <ul class="tasks">
+        <li>Definición de escenarios y algoritmos</li>
+        <li>Modificaciones del ambiente para pruebas</li>
+        <li>Scripts de ejecución</li>
+        <li>Ejecuciones con algoritmo IA2C para primer escenario</li>
+        <li>Ejecuciones con algoritmo IPPO para primer escenario</li>
+      </ul>
+    </section>
+
+    <section>
+      <div class="entry-head">
+        <h2>Resultados</h2>
+      </div>
+      <div class="subsection">
+        <h3>Resultados IA2C</h3>
+        <div>Primer experimento <code>lr=0.002, grad_norm_clip=10, target_update_interval_or_tau=0.01</code></div>
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/2/figures/learning_curve.png" width="90%">
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/2/figures/critic_grad_norm.png" width="90%">
+        <div>Segundo experimento <code>lr=0.005, grad_norm_clip=5, target_update_interval_or_tau=0.01</code></div>
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/3/figures/learning_curve.png" width="90%">
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/3/figures/critic_grad_norm.png" width="90%">
+        <div>Tercer experimento <code>lr=0.005, grad_norm_clip=5, target_update_interval_or_tau=0.001</code></div>
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/4/figures/learning_curve.png" width="90%">
+        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/4/figures/critic_grad_norm.png" width="90%">
+        Video de ejecución (Primer experimento en 7e6 pasos)
+        <video width="50%" height="260" controls>
+          <source src="./codigo/ia2c_1m.mp4" type="video/mp4">
+          Tu navegador no soporta el elemento de vídeo.
+        </video>
+      </div>
+      <div class="subsection">
+        <h3>Resultados IPPO</h3>
+        <div>Primer experimento <code>lr=0.0003, grad_norm_clip=5</code></div>
+        <img src="./codigo/experiments/results/sacred/ippo/rware_rware-tiny-2ag-v2/1/figures/learning_curve.png" width="90%">
+        <img src="./codigo/experiments/results/sacred/ippo/rware_rware-tiny-2ag-v2/1/figures/critic_grad_norm.png" width="90%">
+        <div>Segundo experimento <code>lr=0.0003, grad_norm_clip=10</code></div>
+        <img src="./codigo/experiments/results/sacred/ippo/rware_rware-tiny-2ag-v2/2/figures/learning_curve.png" width="90%">
+        <img src="./codigo/experiments/results/sacred/ippo/rware_rware-tiny-2ag-v2/2/figures/critic_grad_norm.png" width="90%">
+        Videos de ejecución (Segundo experimento en 9e6 pasos)
+        <video width="50%" height="260" controls>
+          <source src="./codigo/ippo_1m.mp4" type="video/mp4">
+          Tu navegador no soporta el elemento de vídeo.
+        </video>
+        <video width="50%" height="260" controls>
+          <source src="./codigo/ippo_2m.mp4" type="video/mp4">
+          Tu navegador no soporta el elemento de vídeo.
+        </video>
+      </div>
+    </section>
+
+    <section>
+      <div class="entry-head">
+        <h2>Próximos pasos</h2>
+      </div>
+      <div class="write-area">
+        <p>Random search de parámetros sobre IA2C</p>
+        <p>Prueba con recompensas individuales, no globales</p>
+        <p>Escenario con más agentes</p>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

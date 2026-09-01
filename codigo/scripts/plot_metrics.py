@@ -3,7 +3,7 @@ import argparse, json
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-RELEVANT = ["test_return_mean", "return_mean", "critic_grad_norm", "episode_collisions_mean"]
+RELEVANT = ["test_return_mean", "return_mean", "critic_grad_norm", "episode_collisions_mean", "td_error_abs", "advantage_mean"]
 
 def series(data, name):
     m = data.get(name)
