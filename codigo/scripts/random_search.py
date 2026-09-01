@@ -302,7 +302,7 @@ def main():
     parser.add_argument("--timesteps", type=int, default=300_000)
     parser.add_argument("--seed", type=int, default=3)
     parser.add_argument("--search-seed", type=int, default=12345)
-    parser.add_argument("--time-limit", type=int, default=2000)
+    parser.add_argument("--time-limit", type=int, default=500)
 
     parser.add_argument(
         "--base-yaml",
