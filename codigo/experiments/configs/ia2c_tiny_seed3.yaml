@@ -52,16 +52,16 @@ obs_last_action: True
 
 
 # --- RL hyperparameters ---
-gamma: 0.99
+gamma: 0.95
 batch_size: 16 # Number of episodes to train on
 batch_size_run: 16
 buffer_size: 16 # Size of the replay buffer
-lr: 0.0004   # Learning rate for agents
+lr: 0.00083
 optim_alpha: 0.99 # RMSProp alpha
 optim_eps: 0.00001 # RMSProp epsilon
-grad_norm_clip: 5 # Reduce magnitude of gradients above this L2 norm
+grad_norm_clip: 10 # Reduce magnitude of gradients above this L2 norm
 add_value_last_step: True
-entropy_coef: 0.001
+entropy_coef: 0.043
 
 
 # --- IA2C NS specific parameters ---
