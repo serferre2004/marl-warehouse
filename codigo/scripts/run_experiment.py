@@ -69,7 +69,6 @@ def main():
         f"env_args.msg_bits={config['environment']['msg_bits']}",
         f"env_args.reward_type={config['environment']['reward_type']}",
         f"env_args.observation_type={config['environment']['observation_type']}",
-        f"env_args.max_steps={config['time_limit']}",       
 
         f"seed={config['seed']}",
 
