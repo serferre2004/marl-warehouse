@@ -14,7 +14,7 @@ SRC = os.path.join(EPYMARL, "src")
 
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
-    
+
 from modules.agents.rnn_agent import RNNAgent
 from rware.warehouse import RewardType
 
@@ -53,7 +53,24 @@ def parse_args():
         "--seed",
         type=int,
         default=0,
-        help="Semilla del episodio.",
+        help=(
+            "Semilla base del episodio. Cuando se especifica, se prueban "
+            "--num-seeds semillas consecutivas a partir de este valor y "
+            "solo se renderiza (guarda video) la que obtenga mejor "
+            "recompensa total."
+        ),
+    )
+
+    parser.add_argument(
+        "--num-seeds",
+        type=int,
+        default=10,
+        help=(
+            "Número de semillas a evaluar antes de renderizar. "
+            "Usa un valor entre 10 y 30 para elegir el mejor episodio "
+            "(por defecto 10). Se prueban las semillas "
+            "[--seed, --seed + 1, ..., --seed + num_seeds - 1]."
+        ),
     )
 
     parser.add_argument(
@@ -73,6 +90,120 @@ def parse_args():
     return parser.parse_args()
 
 
+def build_env(time_limit):
+    # tiny-2ag
+    return gym.make(
+        "rware-tiny-2ag-v2",
+        reward_type=RewardType.THREE_STAGE,
+        render_mode="rgb_array",
+        max_steps=time_limit,
+    )
+
+
+def run_episode(
+    env,
+    agent,
+    seed,
+    time_limit,
+    n_agents,
+    n_actions,
+    obs_agent_id,
+    obs_last_action,
+    hidden_dim,
+    render,
+):
+    """Ejecuta un episodio completo con una semilla dada.
+
+    Si render=True, guarda los frames renderizados. Si render=False,
+    se omite el renderizado para acelerar la búsqueda de la mejor semilla.
+
+    Devuelve un diccionario con el resultado del episodio.
+    """
+
+    obs, info = env.reset(seed=seed)
+
+    obs = np.asarray(obs, dtype=np.float32)
+
+    if obs.ndim == 1:
+        obs = obs.reshape(n_agents, -1)
+
+    hidden_states = th.zeros(n_agents, hidden_dim)
+    last_actions = th.zeros(n_agents, n_actions)
+
+    frames = []
+
+    total_reward = 0.0
+    deliveries = 0
+    collisions = 0
+    step = -1
+
+    if render:
+        frame = env.render()
+        if frame is not None:
+            frames.append(np.asarray(frame))
+
+    for step in range(time_limit):
+
+        obs_tensor = th.tensor(obs, dtype=th.float32)
+
+        inputs = [obs_tensor]
+
+        if obs_last_action:
+            inputs.append(last_actions)
+
+        if obs_agent_id:
+            agent_ids = th.eye(n_agents)
+            inputs.append(agent_ids)
+
+        agent_inputs = th.cat(inputs, dim=1)
+
+        with th.no_grad():
+            q_values, hidden_states = agent(agent_inputs, hidden_states)
+
+        actions = th.argmax(q_values, dim=1).cpu().numpy().astype(np.int64)
+
+        next_obs, reward, terminated, truncated, info = env.step(actions)
+
+        if np.isscalar(reward):
+            episode_reward = float(reward)
+        else:
+            episode_reward = float(np.sum(reward))
+
+        total_reward += episode_reward
+
+        if isinstance(info, dict):
+            if "deliveries" in info:
+                deliveries = info["deliveries"]
+            if "collisions" in info:
+                collisions = info["collisions"]
+
+        obs = np.asarray(next_obs, dtype=np.float32)
+
+        if obs.ndim == 1:
+            obs = obs.reshape(n_agents, -1)
+
+        if obs_last_action:
+            last_actions.zero_()
+            last_actions[np.arange(n_agents), actions] = 1.0
+
+        if render:
+            frame = env.render()
+            if frame is not None:
+                frames.append(np.asarray(frame))
+
+        if terminated or truncated:
+            break
+
+    return {
+        "seed": seed,
+        "steps": step + 1,
+        "total_reward": total_reward,
+        "deliveries": deliveries,
+        "collisions": collisions,
+        "frames": frames,
+    }
+
+
 def main():
     args = parse_args()
 
@@ -87,22 +218,13 @@ def main():
     obs_agent_id = True
     obs_last_action = True
 
-    # tiny-2ag
-    env = gym.make(
-        "rware-tiny-2ag-v2",
-        reward_type=RewardType.THREE_STAGE,
-        render_mode="rgb_array",
-        max_steps=args.time_limit,
-    )
+    env = build_env(args.time_limit)
 
     # ---------------------------------------------------------------
-    # Inicialización
+    # Inicialización (para conocer tamaños de obs / acciones)
     # ---------------------------------------------------------------
 
     obs, info = env.reset(seed=args.seed)
-
-    # Gymnasium puede devolver distintas estructuras dependiendo
-    # de la versión de RWARE.
     obs = np.asarray(obs, dtype=np.float32)
 
     if obs.ndim == 1:
@@ -145,14 +267,9 @@ def main():
     model_path = os.path.join(args.checkpoint, "agent.th")
 
     if not os.path.isfile(model_path):
-        raise FileNotFoundError(
-            f"No se encontró agent.th en:\n{model_path}"
-        )
+        raise FileNotFoundError(f"No se encontró agent.th en:\n{model_path}")
 
-    state_dict = th.load(
-        model_path,
-        map_location="cpu",
-    )
+    state_dict = th.load(model_path, map_location="cpu")
 
     agent.load_state_dict(state_dict)
     agent.eval()
@@ -160,142 +277,77 @@ def main():
     print(f"\nModelo cargado: {model_path}")
 
     # ---------------------------------------------------------------
-    # Estado oculto de cada agente
-    # BasicMAC utiliza:
-    #
-    # [batch, n_agents, hidden_dim]
+    # Búsqueda de la mejor semilla
     # ---------------------------------------------------------------
 
-    hidden_states = th.zeros(
-        n_agents,
-        hidden_dim,
+    num_seeds = max(1, args.num_seeds)
+    if num_seeds > 1:
+        candidate_seeds = [np.random.randint(1, 1000000) for _ in range(num_seeds)]
+    else:
+        candidate_seeds = [args.seed]
+
+    print(
+        f"\nEvaluando {num_seeds} semilla(s) "
+        f"({candidate_seeds[0]}..{candidate_seeds[-1]}) para elegir la mejor..."
     )
 
-    # Últimas acciones, solamente necesarias si obs_last_action=True.
-    last_actions = th.zeros(
-        n_agents,
-        n_actions,
+    best_result = None
+
+    for i, seed in enumerate(candidate_seeds):
+        result = run_episode(
+            env=env,
+            agent=agent,
+            seed=seed,
+            time_limit=args.time_limit,
+            n_agents=n_agents,
+            n_actions=n_actions,
+            obs_agent_id=obs_agent_id,
+            obs_last_action=obs_last_action,
+            hidden_dim=hidden_dim,
+            # Solo renderizamos el episodio final elegido, no todos los
+            # candidatos, para no gastar tiempo/memoria de más.
+            render=False,
+        )
+
+        print(
+            f"  [{i + 1}/{num_seeds}] semilla={seed:<6} "
+            f"recompensa={result['total_reward']:.4f} "
+            f"entregas={result['deliveries']} "
+            f"colisiones={result['collisions']} "
+            f"pasos={result['steps']}"
+        )
+
+        if best_result is None or result["total_reward"] > best_result["total_reward"]:
+            best_result = result
+
+    best_seed = best_result["seed"]
+
+    print(
+        f"\nMejor semilla: {best_seed} "
+        f"(recompensa={best_result['total_reward']:.4f})"
     )
-
-    frames = []
-
-    total_reward = 0.0
-    deliveries = 0
-    collisions = 0
-
-    # Primer frame
-    frame = env.render()
-
-    if frame is not None:
-        frames.append(np.asarray(frame))
+    print("Re-ejecutando el episodio con renderizado para guardar el video...")
 
     # ---------------------------------------------------------------
-    # Ejecutar episodio
+    # Re-ejecutar la mejor semilla, esta vez renderizando y guardando
     # ---------------------------------------------------------------
 
-    for step in range(args.time_limit):
-
-        obs_tensor = th.tensor(
-            obs,
-            dtype=th.float32,
-        )
-
-        inputs = []
-
-        # Observación
-        inputs.append(obs_tensor)
-
-        # Última acción
-        if obs_last_action:
-            inputs.append(last_actions)
-
-        # ID del agente
-        if obs_agent_id:
-            agent_ids = th.eye(n_agents)
-            inputs.append(agent_ids)
-
-        # Igual que BasicMAC._build_inputs():
-        # concatenamos las entradas de cada agente.
-        agent_inputs = th.cat(inputs, dim=1)
-
-        # Forward del GRU.
-        with th.no_grad():
-            q_values, hidden_states = agent(
-                agent_inputs,
-                hidden_states,
-            )
-
-        # -----------------------------------------------------------
-        # Política greedy
-        # -----------------------------------------------------------
-
-        actions = th.argmax(
-            q_values,
-            dim=1,
-        ).cpu().numpy()
-
-        actions = actions.astype(np.int64)
-
-        # -----------------------------------------------------------
-        # Step
-        # -----------------------------------------------------------
-
-        next_obs, reward, terminated, truncated, info = env.step(
-            actions
-        )
-
-        # RWARE puede devolver reward global o vectorial dependiendo
-        # de reward_type.
-        if np.isscalar(reward):
-            episode_reward = float(reward)
-        else:
-            episode_reward = float(np.sum(reward))
-
-        total_reward += episode_reward
-
-        # -----------------------------------------------------------
-        # Información adicional
-        # -----------------------------------------------------------
-
-        if isinstance(info, dict):
-
-            # Algunas versiones/implementaciones de RWARE exponen
-            # información de entregas mediante info.
-            if "deliveries" in info:
-                deliveries = info["deliveries"]
-
-            if "collisions" in info:
-                collisions = info["collisions"]
-
-        obs = np.asarray(
-            next_obs,
-            dtype=np.float32,
-        )
-
-        if obs.ndim == 1:
-            obs = obs.reshape(n_agents, -1)
-
-        if obs_last_action:
-            last_actions.zero_()
-            last_actions[
-                np.arange(n_agents),
-                actions,
-            ] = 1.0
-
-        # Frame
-        frame = env.render()
-
-        if frame is not None:
-            frames.append(np.asarray(frame))
-
-        if terminated or truncated:
-            break
+    final_result = run_episode(
+        env=env,
+        agent=agent,
+        seed=best_seed,
+        time_limit=args.time_limit,
+        n_agents=n_agents,
+        n_actions=n_actions,
+        obs_agent_id=obs_agent_id,
+        obs_last_action=obs_last_action,
+        hidden_dim=hidden_dim,
+        render=True,
+    )
 
     env.close()
 
-    # ---------------------------------------------------------------
-    # Guardar video
-    # ---------------------------------------------------------------
+    frames = final_result["frames"]
 
     if not frames:
         raise RuntimeError(
@@ -303,24 +355,21 @@ def main():
             "Comprueba que RWARE tenga render_mode='rgb_array'."
         )
 
-    imageio.mimsave(
-        args.output,
-        frames,
-        fps=args.fps,
-    )
+    imageio.mimsave(args.output, frames, fps=args.fps)
 
     # ---------------------------------------------------------------
     # Resultados
     # ---------------------------------------------------------------
 
     print("\n" + "=" * 50)
-    print("RESULTADO DEL EPISODIO")
+    print("RESULTADO DEL EPISODIO (mejor semilla)")
     print("=" * 50)
 
-    print(f"Pasos:       {step + 1}")
-    print(f"Recompensa:  {total_reward:.4f}")
-    print(f"Entregas:    {deliveries}")
-    print(f"Colisiones:  {collisions}")
+    print(f"Semilla:     {final_result['seed']}")
+    print(f"Pasos:       {final_result['steps']}")
+    print(f"Recompensa:  {final_result['total_reward']:.4f}")
+    print(f"Entregas:    {final_result['deliveries']}")
+    print(f"Colisiones:  {final_result['collisions']}")
     print(f"Video:       {args.output}")
     print("=" * 50)
 
