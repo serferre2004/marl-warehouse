@@ -38,10 +38,16 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = PROJECT_ROOT / "scripts" / "run_experiment.py"
 
-SEARCH_DIR = PROJECT_ROOT / "experiments" / "random_search"
-CONFIG_DIR = SEARCH_DIR / "configs"
-SEARCH_RESULTS_DIR = SEARCH_DIR / "results"
-RESULTS_CSV = SEARCH_DIR / "random_search_results.csv"
+
+def resolve_search_paths(algorithm):
+    algorithm = (algorithm or "ia2c").lower()
+    search_dir = PROJECT_ROOT / "experiments" / "random_search" / algorithm
+    return {
+        "search_dir": search_dir,
+        "config_dir": search_dir / "configs",
+        "search_results_dir": search_dir / "results",
+        "results_csv": search_dir / "random_search_results.csv",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -52,8 +58,36 @@ def sample_log_uniform(rng, low, high):
     return math.exp(rng.uniform(math.log(low), math.log(high)))
 
 
-def sample_config(rng):
-    """Genera una configuración IA2C."""
+def sample_config(rng, algorithm):
+    """Genera una configuración aleatoria para el algoritmo objetivo."""
+
+    algorithm = (algorithm or "ia2c").lower()
+
+    if algorithm == "ippo":
+        return {
+            # Optimización
+            "lr": sample_log_uniform(rng, 1e-4, 3e-3),
+            "gamma": rng.choice([0.95, 0.97, 0.99, 0.995]),
+            "grad_norm_clip": rng.choice([5, 10, 20]),
+
+            # Arquitectura
+            "hidden_dim": rng.choice([64, 128, 256]),
+
+            # Entrenamiento
+            "batch_size": rng.choice([8, 16, 32]),
+            "batch_size_run": rng.choice([8, 16, 32]),
+            "epochs": rng.choice([2, 4, 6]),
+            "eps_clip": rng.choice([0.1, 0.2, 0.3]),
+            "target_update_interval_or_tau": rng.choice([0.01, 0.05, 0.1]),
+
+            # Exploración / política
+            "entropy_coef": sample_log_uniform(rng, 1e-3, 5e-2),
+
+            # Valores fijos para mantener consistencia con las configs base.
+            "optim_alpha": 0.99,
+            "optim_eps": 1e-5,
+            "add_value_last_step": True,
+        }
 
     return {
         # Optimización
@@ -68,7 +102,6 @@ def sample_config(rng):
         "batch_size": rng.choice([16, 32, 64]),
 
         # Exploración / política
-        # Si tu configuración IA2C usa este parámetro, se conserva.
         "entropy_coef": sample_log_uniform(rng, 1e-3, 5e-2),
 
         # Estos valores se mantienen fijos en esta primera búsqueda.
@@ -236,19 +269,20 @@ def collect_result_information(search_root, trial_start_time):
 # YAML
 # ---------------------------------------------------------------------------
 
-def build_yaml(base_yaml_path, trial_id, hp, timesteps, seed, time_limit):
+def build_yaml(base_yaml_path, algorithm, trial_id, hp, timesteps, seed, time_limit, search_results_dir):
     with base_yaml_path.open("r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+        config = yaml.safe_load(f) or {}
 
-    config["name"] = f"ia2c_random_trial_{trial_id:03d}"
-    config["algorithm"] = "ia2c"
+    algorithm = (algorithm or "ia2c").lower()
+    config["name"] = f"{algorithm}_random_trial_{trial_id:03d}"
+    config["algorithm"] = algorithm
     config["seed"] = seed
     config["time_limit"] = time_limit
 
     config.setdefault("training", {})
     config["training"]["timesteps"] = timesteps
     config.setdefault("results", {})
-    config["results"]["path"] = str(SEARCH_RESULTS_DIR.relative_to(PROJECT_ROOT))
+    config["results"]["path"] = str(search_results_dir.relative_to(PROJECT_ROOT))
 
     for key, value in hp.items():
         config[key] = value
@@ -260,12 +294,12 @@ def build_yaml(base_yaml_path, trial_id, hp, timesteps, seed, time_limit):
 # CSV
 # ---------------------------------------------------------------------------
 
-def append_csv(row):
-    RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
+def append_csv(row, results_csv):
+    results_csv.parent.mkdir(parents=True, exist_ok=True)
 
     existing_fields = []
-    if RESULTS_CSV.exists():
-        with RESULTS_CSV.open("r", encoding="utf-8", newline="") as f:
+    if results_csv.exists():
+        with results_csv.open("r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f)
             try:
                 existing_fields = next(reader)
@@ -280,13 +314,13 @@ def append_csv(row):
     # Reescribir si aparecen nuevas columnas. Esto permite que trials con
     # distintos archivos de métricas no rompan el CSV.
     old_rows = []
-    if RESULTS_CSV.exists():
-        with RESULTS_CSV.open("r", encoding="utf-8", newline="") as f:
+    if results_csv.exists():
+        with results_csv.open("r", encoding="utf-8", newline="") as f:
             old_rows = list(csv.DictReader(f))
 
     old_rows.append({k: row.get(k, "") for k in fields})
 
-    with RESULTS_CSV.open("w", encoding="utf-8", newline="") as f:
+    with results_csv.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(old_rows)
@@ -303,6 +337,11 @@ def main():
     parser.add_argument("--seed", type=int, default=3)
     parser.add_argument("--search-seed", type=int, default=12345)
     parser.add_argument("--time-limit", type=int, default=500)
+    parser.add_argument(
+        "--algorithm",
+        choices=["ia2c", "ippo"],
+        help="Algoritmo objetivo para la búsqueda. Si no se indica, se infiere desde el YAML base.",
+    )
 
     parser.add_argument(
         "--base-yaml",
@@ -324,35 +363,45 @@ def main():
     if not args.base_yaml.exists():
         raise FileNotFoundError(f"No existe el YAML base: {args.base_yaml}")
 
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    with args.base_yaml.open("r", encoding="utf-8") as f:
+        base_config = yaml.safe_load(f) or {}
+
+    algorithm = (args.algorithm or base_config.get("algorithm") or "ia2c").lower()
+    search_paths = resolve_search_paths(algorithm)
+
+    search_paths["config_dir"].mkdir(parents=True, exist_ok=True)
 
     rng = random.Random(args.search_seed)
 
     print("=" * 72)
-    print("IA2C RANDOM SEARCH")
+    print(f"{algorithm.upper()} RANDOM SEARCH")
     print("=" * 72)
     print(f"Trials:             {args.trials}")
     print(f"Timesteps / trial:  {args.timesteps:,}")
     print(f"Environment seed:   {args.seed}")
     print(f"Search seed:        {args.search_seed}")
     print(f"Time limit:         {args.time_limit}")
+    print(f"Algorithm:          {algorithm}")
     print(f"Base YAML:          {args.base_yaml}")
-    print(f"Results CSV:        {RESULTS_CSV}")
+    print(f"Search dir:         {search_paths['search_dir']}")
+    print(f"Results CSV:        {search_paths['results_csv']}")
     print("=" * 72)
 
     for trial in range(1, args.trials + 1):
-        hp = sample_config(rng)
+        hp = sample_config(rng, algorithm)
 
         config = build_yaml(
             args.base_yaml,
+            algorithm,
             trial,
             hp,
             args.timesteps,
             args.seed,
             args.time_limit,
+            search_paths["search_results_dir"],
         )
 
-        trial_yaml = CONFIG_DIR / f"trial_{trial:03d}.yaml"
+        trial_yaml = search_paths["config_dir"] / f"trial_{trial:03d}.yaml"
 
         with trial_yaml.open("w", encoding="utf-8") as f:
             yaml.safe_dump(config, f, sort_keys=False, allow_unicode=True)
@@ -391,7 +440,7 @@ def main():
         elapsed = finished - started
 
         result_info = collect_result_information(
-            SEARCH_RESULTS_DIR,
+            search_paths["search_results_dir"],
             started,
         )
 
@@ -420,12 +469,12 @@ def main():
 
         row["result_files"] = result_info["result_files"]
 
-        append_csv(row)
+        append_csv(row, search_paths["results_csv"])
 
         print(f"\nTrial {trial} terminado.")
         print(f"Return code: {return_code}")
         print(f"Duración: {elapsed / 60:.2f} min")
-        print(f"CSV: {RESULTS_CSV}")
+        print(f"CSV: {search_paths['results_csv']}")
 
         if return_code != 0 and not args.keep_failed:
             try:
@@ -437,8 +486,8 @@ def main():
     print("=" * 72)
     print("RANDOM SEARCH TERMINADO")
     print("=" * 72)
-    print(f"Resultados: {RESULTS_CSV}")
-    print(f"Configuraciones: {CONFIG_DIR}")
+    print(f"Resultados: {search_paths['results_csv']}")
+    print(f"Configuraciones: {search_paths['config_dir']}")
 
 
 if __name__ == "__main__":
