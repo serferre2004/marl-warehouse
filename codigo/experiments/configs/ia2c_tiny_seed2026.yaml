@@ -1,0 +1,83 @@
+name: ia2c_tiny_seed3
+
+algorithm: ia2c
+seed: 2026
+time_limit: 500
+
+training:
+  timesteps: 20000000
+
+environment:
+  key: "rware:rware"
+  scenario: tiny
+
+  n_agents: 2
+  request_queue_size: 2
+
+  sensor_range: 1
+  msg_bits: 0
+
+  reward_type: THREE_STAGE
+  observation_type: FLATTENED
+
+
+reward:
+  common: true
+  scalarisation: "sum"
+
+
+evaluation:
+  enabled: true
+  interval: 100000
+  episodes: 100
+
+logging:
+  runner_interval: 4000
+  learner_interval: 4000
+  general_interval: 4000
+
+checkpoint:
+  save: true
+  interval: 1000000
+
+results:
+  path: experiments/results
+
+
+# --- Agent parameters ---
+agent: "rnn"
+hidden_dim: 128 # Size of hidden state for default rnn agent
+obs_agent_id: True # Include the agent's one_hot id in the observation
+obs_last_action: True
+
+
+# --- RL hyperparameters ---
+gamma: 0.95
+batch_size: 16 # Number of episodes to train on
+batch_size_run: 16
+buffer_size: 16 # Size of the replay buffer
+lr: 0.00083
+optim_alpha: 0.99 # RMSProp alpha
+optim_eps: 0.00001 # RMSProp epsilon
+grad_norm_clip: 10 # Reduce magnitude of gradients above this L2 norm
+add_value_last_step: True
+entropy_coef: 0.043
+
+
+# --- IA2C NS specific parameters ---
+
+action_selector: "soft_policies"
+mask_before_softmax: True
+
+runner: "parallel"
+
+# update the target network every {} training steps
+target_update_interval_or_tau: 0.001
+
+agent_output_type: "pi_logits"
+learner: "actor_critic_learner"
+standardise_returns: False
+standardise_rewards: False
+use_rnn: True
+q_nstep: 5 # 1 corresponds to normal r + gammaV
+critic_type: "ac_critic"
