@@ -37,6 +37,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = PROJECT_ROOT / "scripts" / "run_experiment.py"
+SUPPORTED_ALGORITHMS = ("ia2c", "ippo", "maa2c")
 
 
 def resolve_search_paths(algorithm):
@@ -78,6 +79,30 @@ def sample_config(rng, algorithm):
             "batch_size_run": rng.choice([8, 16, 32]),
             "epochs": rng.choice([2, 4, 6]),
             "eps_clip": rng.choice([0.1, 0.2, 0.3]),
+            "target_update_interval_or_tau": rng.choice([0.01, 0.05, 0.1]),
+
+            # Exploración / política
+            "entropy_coef": sample_log_uniform(rng, 1e-3, 5e-2),
+
+            # Valores fijos para mantener consistencia con las configs base.
+            "optim_alpha": 0.99,
+            "optim_eps": 1e-5,
+            "add_value_last_step": True,
+        }
+
+    if algorithm == "maa2c":
+        return {
+            # Optimización
+            "lr": sample_log_uniform(rng, 1e-4, 1e-3),
+            "gamma": rng.choice([0.95, 0.97, 0.99, 0.995]),
+            "grad_norm_clip": rng.choice([5, 10, 20]),
+
+            # Arquitectura
+            "hidden_dim": rng.choice([64, 128, 256]),
+
+            # Entrenamiento
+            "batch_size": rng.choice([8, 16, 32]),
+            "batch_size_run": rng.choice([8, 16, 32]),
             "target_update_interval_or_tau": rng.choice([0.01, 0.05, 0.1]),
 
             # Exploración / política
@@ -265,15 +290,143 @@ def collect_result_information(search_root, trial_start_time):
         "metrics": metrics,
     }
 
+
+def latest_metrics_snapshot(search_root, trial_start_time):
+    files = sorted(search_root.rglob("metrics.json")) if search_root.exists() else []
+
+    recent = []
+    for path in files:
+        try:
+            if path.stat().st_mtime >= trial_start_time - 5:
+                recent.append(path)
+        except OSError:
+            pass
+
+    candidates = recent or files
+    if not candidates:
+        return {}
+
+    metrics_path = max(candidates, key=lambda path: path.stat().st_mtime)
+    obj = load_json(metrics_path)
+    if not isinstance(obj, dict):
+        return {}
+
+    metric = obj.get("test_return_mean", {})
+    if not isinstance(metric, dict):
+        return {}
+
+    steps = metric.get("steps", [])
+    values = numeric_values(metric.get("values", []))
+
+    if not steps and not values:
+        return {}
+
+    return {
+        "metrics_path": metrics_path,
+        "steps": steps,
+        "values": values,
+        "last_step": steps[-1] if steps else None,
+        "last_value": values[-1] if values else None,
+        "max_value": max(values) if values else None,
+    }
+
+
+def should_trigger_early_stop(search_root, trial_start_time, early_stop_steps, early_stop_threshold):
+    if early_stop_steps is None or early_stop_steps <= 0:
+        return False
+
+    if early_stop_threshold is None:
+        return False
+
+    snapshot = latest_metrics_snapshot(search_root, trial_start_time)
+    if not snapshot:
+        return False
+
+    last_step = snapshot.get("last_step")
+    max_value = snapshot.get("max_value")
+
+    if last_step is None or max_value is None:
+        return False
+
+    if last_step < early_stop_steps:
+        return False
+
+    return max_value < early_stop_threshold
+
 # ---------------------------------------------------------------------------
 # YAML
 # ---------------------------------------------------------------------------
+
+def load_algorithm_default_config(algorithm):
+    algorithm = (algorithm or "ia2c").lower()
+    default_config_path = (
+        PROJECT_ROOT
+        / "epymarl"
+        / "src"
+        / "config"
+        / "algs"
+        / f"{algorithm}.yaml"
+    )
+
+    if not default_config_path.exists():
+        return {}
+
+    with default_config_path.open("r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def legacy_algorithm_keys_for(algorithm):
+    algorithm = (algorithm or "ia2c").lower()
+    defaults = {name: load_algorithm_default_config(name) for name in SUPPORTED_ALGORITHMS}
+
+    union_keys = set()
+    for cfg in defaults.values():
+        union_keys.update(cfg.keys())
+
+    shared_keys = set.intersection(*(set(cfg.keys()) for cfg in defaults.values()))
+    current_keys = set(defaults.get(algorithm, {}).keys())
+
+    return union_keys - shared_keys - current_keys
+
+
+def prune_legacy_algorithm_keys(base_config, algorithm):
+    if not isinstance(base_config, dict):
+        return base_config
+
+    legacy_keys = legacy_algorithm_keys_for(algorithm)
+    if not legacy_keys:
+        return base_config
+
+    pruned_config = dict(base_config)
+    for key in list(pruned_config.keys()):
+        if key in legacy_keys:
+            pruned_config.pop(key, None)
+
+    return pruned_config
+
+
+def merge_algorithm_defaults(base_config, algorithm):
+    algorithm_defaults = load_algorithm_default_config(algorithm)
+    if not algorithm_defaults:
+        return base_config
+
+    for key, value in algorithm_defaults.items():
+        if key in {"name", "t_max"}:
+            continue
+        if key not in base_config:
+            base_config[key] = value
+
+    return base_config
+
 
 def build_yaml(base_yaml_path, algorithm, trial_id, hp, timesteps, seed, time_limit, search_results_dir):
     with base_yaml_path.open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
     algorithm = (algorithm or "ia2c").lower()
+    config = prune_legacy_algorithm_keys(config, algorithm)
+    config = merge_algorithm_defaults(config, algorithm)
+
     config["name"] = f"{algorithm}_random_trial_{trial_id:03d}"
     config["algorithm"] = algorithm
     config["seed"] = seed
@@ -339,7 +492,7 @@ def main():
     parser.add_argument("--time-limit", type=int, default=500)
     parser.add_argument(
         "--algorithm",
-        choices=["ia2c", "ippo"],
+        choices=["ia2c", "ippo", "maa2c"],
         help="Algoritmo objetivo para la búsqueda. Si no se indica, se infiere desde el YAML base.",
     )
 
@@ -353,6 +506,18 @@ def main():
         "--keep-failed",
         action="store_true",
         help="Conserva los YAML aunque el entrenamiento falle.",
+    )
+    parser.add_argument(
+        "--early-stop-steps",
+        type=int,
+        default=10_000_000,
+        help="Si el valor máximo de test_return_mean aún no supera el umbral para esta cantidad de pasos, aborta el trial antes de gastar más cálculo.",
+    )
+    parser.add_argument(
+        "--early-stop-threshold",
+        type=float,
+        default=1.0,
+        help="Umbral de retorno medio en test que activa el early stopping.",
     )
 
     args = parser.parse_args()
@@ -424,14 +589,42 @@ def main():
 
         return_code = None
         error_message = ""
+        early_stopped = False
 
         try:
-            completed = subprocess.run(
+            process = subprocess.Popen(
                 command,
                 cwd=PROJECT_ROOT,
-                check=False,
             )
-            return_code = completed.returncode
+
+            while process.poll() is None:
+                if should_trigger_early_stop(
+                    search_paths["search_results_dir"],
+                    started,
+                    args.early_stop_steps,
+                    args.early_stop_threshold,
+                ):
+                    early_stopped = True
+                    process.terminate()
+                    try:
+                        process.wait(timeout=20)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait()
+
+                    print(
+                        f"\nEarly stopping activado para trial {trial}: "
+                        f"test_return_mean máximo aún < {args.early_stop_threshold} "
+                        f"tras {args.early_stop_steps} pasos."
+                    )
+                    break
+
+                time.sleep(30)
+
+            if process.poll() is None:
+                process.wait()
+
+            return_code = process.returncode
 
         except Exception as exc:
             error_message = repr(exc)
@@ -446,7 +639,7 @@ def main():
 
         row = {
             "trial": trial,
-            "status": "completed" if return_code == 0 else "failed",
+            "status": "early_stopped" if early_stopped else ("completed" if return_code == 0 else "failed"),
             "return_code": return_code,
             "start_time": start_dt,
             "duration_seconds": round(elapsed, 3),
@@ -457,6 +650,8 @@ def main():
             "time_limit": args.time_limit,
             "config_file": str(trial_yaml.relative_to(PROJECT_ROOT)),
             "error": error_message,
+            "early_stop_steps": args.early_stop_steps,
+            "early_stop_threshold": args.early_stop_threshold,
         }
 
         # Hiperparámetros explícitos.
@@ -473,6 +668,7 @@ def main():
 
         print(f"\nTrial {trial} terminado.")
         print(f"Return code: {return_code}")
+        print(f"Estado: {row['status']}")
         print(f"Duración: {elapsed / 60:.2f} min")
         print(f"CSV: {search_paths['results_csv']}")
 
