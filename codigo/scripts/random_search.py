@@ -27,6 +27,7 @@ import math
 import os
 import random
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -371,10 +372,24 @@ def stop_trial_process(process):
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
-    else:
+        return process.returncode
+
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    except PermissionError:
         process.terminate()
+
+    try:
+        process.wait(timeout=20)
+    except subprocess.TimeoutExpired:
         try:
-            process.wait(timeout=20)
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        try:
+            process.wait(timeout=10)
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
@@ -636,9 +651,13 @@ def main():
         early_stopped = False
 
         try:
+            popen_kwargs = {"cwd": PROJECT_ROOT}
+            if os.name != "nt":
+                popen_kwargs["start_new_session"] = True
+
             process = subprocess.Popen(
                 command,
-                cwd=PROJECT_ROOT,
+                **popen_kwargs,
             )
 
             while process.poll() is None:
