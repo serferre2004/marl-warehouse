@@ -357,7 +357,7 @@ def should_trigger_early_stop(search_root, trial_start_time, early_stop_steps, e
 
 def stop_trial_process(process):
     if process.poll() is not None:
-        return
+        return process.returncode
 
     if os.name == "nt":
         subprocess.run(
@@ -366,6 +366,11 @@ def stop_trial_process(process):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        try:
+            process.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
     else:
         process.terminate()
         try:
@@ -373,6 +378,8 @@ def stop_trial_process(process):
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
+
+    return process.returncode
 
 # ---------------------------------------------------------------------------
 # YAML
@@ -549,6 +556,12 @@ def main():
         default=1.0,
         help="Umbral de retorno medio en test que activa el early stopping.",
     )
+    parser.add_argument(
+        "--early-stop-check-interval",
+        type=float,
+        default=30.0,
+        help="Segundos entre comprobaciones del early stopping.",
+    )
 
     args = parser.parse_args()
 
@@ -645,7 +658,7 @@ def main():
                     )
                     break
 
-                time.sleep(30)
+                time.sleep(args.early_stop_check_interval)
 
             if process.poll() is None:
                 process.wait()
