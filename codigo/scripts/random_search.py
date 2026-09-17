@@ -24,6 +24,7 @@ import argparse
 import csv
 import json
 import math
+import os
 import random
 import shutil
 import subprocess
@@ -353,6 +354,26 @@ def should_trigger_early_stop(search_root, trial_start_time, early_stop_steps, e
 
     return max_value < early_stop_threshold
 
+
+def stop_trial_process(process):
+    if process.poll() is not None:
+        return
+
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    else:
+        process.terminate()
+        try:
+            process.wait(timeout=20)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
+
 # ---------------------------------------------------------------------------
 # YAML
 # ---------------------------------------------------------------------------
@@ -419,7 +440,16 @@ def merge_algorithm_defaults(base_config, algorithm):
     return base_config
 
 
-def build_yaml(base_yaml_path, algorithm, trial_id, hp, timesteps, seed, time_limit, search_results_dir):
+def build_yaml(
+    base_yaml_path,
+    algorithm,
+    trial_id,
+    hp,
+    timesteps,
+    seed,
+    time_limit,
+    trial_results_dir,
+):
     with base_yaml_path.open("r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
@@ -435,7 +465,7 @@ def build_yaml(base_yaml_path, algorithm, trial_id, hp, timesteps, seed, time_li
     config.setdefault("training", {})
     config["training"]["timesteps"] = timesteps
     config.setdefault("results", {})
-    config["results"]["path"] = str(search_results_dir.relative_to(PROJECT_ROOT))
+    config["results"]["path"] = str(trial_results_dir.relative_to(PROJECT_ROOT))
 
     for key, value in hp.items():
         config[key] = value
@@ -554,6 +584,7 @@ def main():
 
     for trial in range(1, args.trials + 1):
         hp = sample_config(rng, algorithm)
+        trial_results_dir = search_paths["search_results_dir"] / f"trial_{trial:03d}"
 
         config = build_yaml(
             args.base_yaml,
@@ -563,7 +594,7 @@ def main():
             args.timesteps,
             args.seed,
             args.time_limit,
-            search_paths["search_results_dir"],
+            trial_results_dir,
         )
 
         trial_yaml = search_paths["config_dir"] / f"trial_{trial:03d}.yaml"
@@ -599,18 +630,13 @@ def main():
 
             while process.poll() is None:
                 if should_trigger_early_stop(
-                    search_paths["search_results_dir"],
+                    trial_results_dir,
                     started,
                     args.early_stop_steps,
                     args.early_stop_threshold,
                 ):
                     early_stopped = True
-                    process.terminate()
-                    try:
-                        process.wait(timeout=20)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait()
+                    stop_trial_process(process)
 
                     print(
                         f"\nEarly stopping activado para trial {trial}: "
@@ -633,7 +659,7 @@ def main():
         elapsed = finished - started
 
         result_info = collect_result_information(
-            search_paths["search_results_dir"],
+            trial_results_dir,
             started,
         )
 

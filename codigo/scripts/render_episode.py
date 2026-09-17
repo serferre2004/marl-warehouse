@@ -212,7 +212,7 @@ def main():
     # ---------------------------------------------------------------
 
     n_agents = 2
-    hidden_dim = 128
+    hidden_dim = 64
     use_rnn = True
 
     obs_agent_id = True
