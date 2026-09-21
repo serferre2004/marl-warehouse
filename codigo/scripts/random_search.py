@@ -39,7 +39,7 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = PROJECT_ROOT / "scripts" / "run_experiment.py"
-SUPPORTED_ALGORITHMS = ("ia2c", "ippo", "maa2c")
+SUPPORTED_ALGORITHMS = ("ia2c", "ippo", "maa2c", "mappo")
 
 
 def resolve_search_paths(algorithm):
@@ -90,6 +90,49 @@ def sample_config(rng, algorithm):
             "optim_alpha": 0.99,
             "optim_eps": 1e-5,
             "add_value_last_step": True,
+        }
+
+    if algorithm == "mappo":
+        batch_size = rng.choice([8, 10, 16, 32])
+        batch_size_run = rng.choice([8, 10, 16, 32])
+
+        return {
+            # Optimizacion
+            "lr": sample_log_uniform(rng, 1e-4, 3e-3),
+            "gamma": rng.choice([0.95, 0.97, 0.99, 0.995]),
+            "grad_norm_clip": rng.choice([5, 10, 20]),
+
+            # Arquitectura
+            "hidden_dim": rng.choice([64, 128, 256]),
+
+            # Entrenamiento PPO con critic centralizado segun mappo.yaml.
+            "batch_size": batch_size,
+            "batch_size_run": batch_size_run,
+            "buffer_size": max(10, batch_size),
+            "epochs": rng.choice([2, 4, 6]),
+            "eps_clip": rng.choice([0.1, 0.2, 0.3]),
+            "target_update_interval_or_tau": rng.choice([0.01, 0.05, 0.1]),
+
+            # Exploracion / politica
+            "entropy_coef": sample_log_uniform(rng, 1e-4, 1e-2),
+
+            # Valores fijos para mantener consistencia con mappo.yaml.
+            "action_selector": "soft_policies",
+            "mask_before_softmax": True,
+            "runner": "parallel",
+            "obs_agent_id": True,
+            "obs_last_action": False,
+            "obs_individual_obs": False,
+            "agent_output_type": "pi_logits",
+            "learner": "ppo_learner",
+            "use_rnn": True,
+            "q_nstep": 5,
+            "critic_type": "cv_critic",
+            "optim_alpha": 0.99,
+            "optim_eps": 1e-5,
+            "add_value_last_step": True,
+            "standardise_returns": False,
+            "standardise_rewards": True,
         }
 
     if algorithm == "maa2c":
@@ -544,7 +587,7 @@ def main():
     parser.add_argument("--time-limit", type=int, default=500)
     parser.add_argument(
         "--algorithm",
-        choices=["ia2c", "ippo", "maa2c"],
+        choices=list(SUPPORTED_ALGORITHMS),
         help="Algoritmo objetivo para la búsqueda. Si no se indica, se infiere desde el YAML base.",
     )
 
