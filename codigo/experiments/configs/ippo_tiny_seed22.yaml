@@ -1,4 +1,4 @@
-name: ippo_tiny_seed3
+name: ippo_tiny_seed22
 
 algorithm: ippo
 seed: 22
