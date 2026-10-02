@@ -11,8 +11,8 @@ environment:
   key: rware:rware
   scenario: tiny
 
-  n_agents: 2
-  request_queue_size: 2
+  n_agents: 4
+  request_queue_size: 4
 
   sensor_range: 1
   msg_bits: 0
