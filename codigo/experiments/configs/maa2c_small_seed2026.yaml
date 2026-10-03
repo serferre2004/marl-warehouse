@@ -1,0 +1,74 @@
+name: maa2c_small_seed2026
+
+algorithm: maa2c
+seed: 2026
+time_limit: 500
+
+training:
+  timesteps: 20000000
+
+environment:
+  key: "rware:rware"
+  scenario: small
+
+  n_agents: 2
+  request_queue_size: 2
+
+  sensor_range: 1
+  msg_bits: 0
+
+  reward_type: THREE_STAGE
+  observation_type: FLATTENED
+
+reward:
+  common: true
+  scalarisation: "sum"
+
+evaluation:
+  enabled: true
+  interval: 100000
+  episodes: 100
+
+logging:
+  runner_interval: 4000
+  learner_interval: 4000
+  general_interval: 4000
+
+checkpoint:
+  save: true
+  interval: 5000000
+
+results:
+  path: experiments/results
+
+# --- Agent parameters ---
+agent: "rnn"
+hidden_dim: 256
+obs_agent_id: True
+obs_last_action: False
+obs_individual_obs: False
+
+# --- RL hyperparameters ---
+gamma: 0.95
+batch_size: 8
+batch_size_run: 8
+buffer_size: 8
+lr: 0.00084
+optim_alpha: 0.99
+optim_eps: 0.00001
+add_value_last_step: True
+entropy_coef: 0.003
+grad_norm_clip: 10
+
+# --- MAA2C-specific parameters ---
+action_selector: "soft_policies"
+mask_before_softmax: True
+runner: "parallel"
+target_update_interval_or_tau: 0.01
+agent_output_type: "pi_logits"
+learner: "actor_critic_learner"
+standardise_returns: False
+standardise_rewards: True
+use_rnn: True
+q_nstep: 5
+critic_type: "cv_critic"
