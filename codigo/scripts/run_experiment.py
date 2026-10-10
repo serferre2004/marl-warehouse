@@ -88,7 +88,6 @@ def main():
     sacred_run_id = resolve_sacred_run_id(config, results_path, key)
     print(f"ID de Sacred: {sacred_run_id}")
 
-
     command = [
         sys.executable,
         "src/main.py",
