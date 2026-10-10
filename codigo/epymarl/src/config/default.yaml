@@ -67,3 +67,4 @@ env_args:
   msg_bits: null
   reward_type: null
   observation_type: null
+  layout: null
