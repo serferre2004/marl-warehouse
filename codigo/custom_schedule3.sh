@@ -11,6 +11,6 @@ for config in "${scheduled[@]}"; do
     echo "Running experiment with config: $config"
     write_log "Running experiment with config: $config"
     config="$config.yaml"
-    python3 codigo/scripts/run_experiment.py experiments/configs/"$config"
+    python3 scripts/run_experiment.py experiments/configs/"$config"
     write_log "Finished experiment with config: $config"
 done

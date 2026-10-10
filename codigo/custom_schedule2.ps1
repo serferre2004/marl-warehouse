@@ -10,6 +10,6 @@ foreach ($config in $scheduled) {
     Write-Host "Running experiment with config: $config"
     Write-Log "Running experiment with config: $config"
     $config = "$($config).yaml"
-    python codigo/scripts/run_experiment.py experiments/configs/$config
+    python scripts/run_experiment.py experiments/configs/$config
     Write-Log "Finished experiment with config: $config"
 }
