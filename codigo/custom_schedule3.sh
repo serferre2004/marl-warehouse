@@ -6,7 +6,7 @@ write_log() {
     echo "$timestamp - $message" >> "$log_file"
 }
 
-scheduled=("ia2c_custom_seed3" "ippo_custom_seed42" "maa2c_custom_seed42" "mappo_custom_seed3")
+scheduled=("ia2c_custom_seed3" "ippo_custom_seed42" "maa2c_custom_seed42" "mappo_custom_seed3" "mappo_custom_seed138")
 for config in "${scheduled[@]}"; do
     echo "Running experiment with config: $config"
     write_log "Running experiment with config: $config"
