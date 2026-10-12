@@ -15,7 +15,7 @@ environment:
   request_queue_size: 4
 
   sensor_range: 1
-  msg_bits: 0
+  msg_bits: 3
 
   reward_type: THREE_STAGE
   observation_type: FLATTENED
@@ -50,7 +50,7 @@ checkpoint:
   interval: 5000000
 
 results:
-  path: experiments/results/custom
+  path: experiments/results/custom/comms
 
 
 # --- Agent parameters ---

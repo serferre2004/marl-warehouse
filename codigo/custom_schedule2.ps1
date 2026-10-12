@@ -5,7 +5,7 @@ function Write-Log {
     "$TimeStamp - $Message" | Out-File -FilePath $LogFile -Append
 }
 
-$scheduled = @("ia2c_custom_seed2026", "ippo_custom_seed22", "maa2c_custom_seed22", "mappo_custom_seed2026")
+$scheduled = @("ia2c_custom_seed2026", "ippo_custom_seed22", "maa2c_custom_seed22")
 foreach ($config in $scheduled) {
     Write-Host "Running experiment with config: $config"
     Write-Log "Running experiment with config: $config"
