@@ -26,6 +26,11 @@ def get_agent_action_count(action_space):
     if isinstance(agent_action_space, gym.spaces.Discrete):
         return agent_action_space.n
 
+    # Con comunicación (msg_bits > 0) el espacio es MultiDiscrete([5, 2, ...]);
+    # la política opera sobre el producto cartesiano aplanado.
+    if isinstance(agent_action_space, gym.spaces.MultiDiscrete):
+        return int(np.prod(agent_action_space.nvec))
+
     raise ValueError(
         "render_episode.py espera acciones discretas por agente. "
         f"Espacio recibido: {agent_action_space}"
@@ -74,9 +79,17 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--msg-bits",
+        type=int,
+        default=0,
+        choices=[0, 3],
+        help="Bits de mensaje del entrenamiento: 0 (vanilla) o 3 (comms).",
+    )
+
+    parser.add_argument(
         "--time-limit",
         type=int,
-        default=1000,
+        default=500,
         help="Número máximo de pasos del episodio.",
     )
 
@@ -90,10 +103,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def build_env(time_limit):
-    # tiny-2ag
+LAYOUT = "x.x.x.x.x\n" * 8 + ".........\n..g...g.."
+
+
+def build_env(time_limit, msg_bits):
+    # small-4ag con el layout y parámetros del entrenamiento (custom)
     return gym.make(
-        "rware-tiny-2ag-v2",
+        "rware-small-4ag-v2",
+        layout=LAYOUT,
+        msg_bits=msg_bits,
+        sensor_range=1,
+        request_queue_size=4,
         reward_type=RewardType.THREE_STAGE,
         render_mode="rgb_array",
         max_steps=time_limit,
@@ -111,6 +131,7 @@ def run_episode(
     obs_last_action,
     hidden_dim,
     render,
+    action_nvec=None,
 ):
     """Ejecuta un episodio completo con una semilla dada.
 
@@ -162,7 +183,16 @@ def run_episode(
 
         actions = th.argmax(q_values, dim=1).cpu().numpy().astype(np.int64)
 
-        next_obs, reward, terminated, truncated, info = env.step(actions)
+        if action_nvec is not None:
+            # Índice plano -> [acción, bit1, bit2, bit3]
+            env_actions = [
+                np.array(np.unravel_index(a, action_nvec), dtype=np.int64)
+                for a in actions
+            ]
+        else:
+            env_actions = actions
+
+        next_obs, reward, terminated, truncated, info = env.step(env_actions)
 
         if np.isscalar(reward):
             episode_reward = float(reward)
@@ -208,17 +238,17 @@ def main():
     args = parse_args()
 
     # ---------------------------------------------------------------
-    # Configuración correspondiente al entrenamiento IA2C
+    # Configuración correspondiente al entrenamiento MAPPO (custom)
     # ---------------------------------------------------------------
 
-    n_agents = 2
-    hidden_dim = 64
+    n_agents = 4
+    hidden_dim = 128
     use_rnn = True
 
     obs_agent_id = True
     obs_last_action = True
 
-    env = build_env(args.time_limit)
+    env = build_env(args.time_limit, args.msg_bits)
 
     # ---------------------------------------------------------------
     # Inicialización (para conocer tamaños de obs / acciones)
@@ -232,6 +262,10 @@ def main():
 
     obs_size = obs.shape[-1]
     n_actions = get_agent_action_count(env.action_space)
+
+    action_nvec = None
+    if args.msg_bits > 0:
+        action_nvec = tuple(int(n) for n in env.action_space[0].nvec)
 
     input_shape = obs_size
 
@@ -282,7 +316,7 @@ def main():
 
     num_seeds = max(1, args.num_seeds)
     if num_seeds > 1:
-        candidate_seeds = [np.random.randint(1, 1000000) for _ in range(num_seeds)]
+        candidate_seeds = list(range(args.seed, args.seed + num_seeds))
     else:
         candidate_seeds = [args.seed]
 
@@ -307,6 +341,7 @@ def main():
             # Solo renderizamos el episodio final elegido, no todos los
             # candidatos, para no gastar tiempo/memoria de más.
             render=False,
+            action_nvec=action_nvec,
         )
 
         print(
@@ -343,6 +378,7 @@ def main():
         obs_last_action=obs_last_action,
         hidden_dim=hidden_dim,
         render=True,
+        action_nvec=action_nvec,
     )
 
     env.close()

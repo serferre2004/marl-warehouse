@@ -2,3 +2,4 @@ codigo/.venv/*
 .venv/*
 */__pycache__/*
 codigo/analysis
+graphify-out/
