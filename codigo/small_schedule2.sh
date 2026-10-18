@@ -5,7 +5,7 @@ write_log() {
     timestamp=$(date +"%m-%d %H:%M:%S")
     echo "$timestamp - $message" >> "$log_file"
 }
-algorithm = "ippo"
+algorithm="ippo"
 seeds=("3" "22" "42" "138" "2026")
 for seed in "${seeds[@]}"; do
     config="${algorithm}_small_seed${seed}.yaml"
