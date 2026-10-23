@@ -131,6 +131,7 @@ class Shelf(Entity):
     def __init__(self, x, y):
         Shelf.counter += 1
         super().__init__(Shelf.counter, x, y)
+        self.depth = None # Dependency graph depth (only enqueued shelves)
 
     @property
     def collision_layers(self):
@@ -167,6 +168,7 @@ class Warehouse(gym.Env):
         image_observation_directional: bool = True,
         normalised_coordinates: bool = False,
         render_mode: str = "human",
+        dependency_prob: float = 0,
     ):
         """The robotic warehouse environment
 
@@ -294,6 +296,9 @@ class Warehouse(gym.Env):
         self.global_image = None
         self.renderer = None
         self.render_mode = render_mode
+        # Dependency implementation
+        self.dependency_prob = dependency_prob
+        self.request_children = {} # shelf -> shelves that have dependency on it
 
     def _make_layout_from_params(self, shelf_columns, shelf_rows, column_height):
         assert shelf_columns % 2 == 1, "Only odd number of shelf columns is supported"
@@ -484,7 +489,7 @@ class Warehouse(gym.Env):
         sensor_per_location_dict.update(
             {
                 "has_shelf": gym.spaces.MultiBinary(1),
-                "shelf_requested": gym.spaces.MultiBinary(1),
+                "shelf_requested": gym.spaces.Box(low=0.0, high=1.0, shape=(1,), dtype=np.float32),
             }
         )
         return gym.spaces.Tuple(
@@ -673,7 +678,7 @@ class Warehouse(gym.Env):
                     obs.write([0.0, 0.0])  # no shelf or requested shelf
                 else:
                     obs.write(
-                        [1.0, int(self.shelfs[id_shelf - 1] in self.request_queue)]
+                        [1.0, self._shelf_request_value(self.shelfs[id_shelf - 1])]
                     )  # shelf presence and request status
             return obs.vector
 
@@ -717,10 +722,15 @@ class Warehouse(gym.Env):
             else:
                 obs["sensors"][i]["has_shelf"] = [1]
                 obs["sensors"][i]["shelf_requested"] = [
-                    int(self.shelfs[id_ - 1] in self.request_queue)
+                    self._shelf_request_value(self.shelfs[id_ - 1])
                 ]
 
         return obs
+
+    def _shelf_request_value(self, shelf):
+        if shelf.depth is None:
+            return 0.0
+        return 1.0 / (shelf.depth + 1)
 
     def _make_obs(self, agent):
         if self.image_obs:
@@ -767,6 +777,7 @@ class Warehouse(gym.Env):
         self._cur_inactive_steps = 0
         self._cur_steps = 0
         self.episode_collisions = 0
+        self.request_children = {}
 
         # n_xshelf = (self.grid_size[1] - 1) // 3
         # n_yshelf = (self.grid_size[0] - 2) // 9
@@ -802,6 +813,10 @@ class Warehouse(gym.Env):
                 self.shelfs, size=self.request_queue_size, replace=False
             )
         )
+
+        # Initial queue without dependencies
+        for shelf in self.request_queue:
+            shelf.depth = 0
 
         return tuple([self._make_obs(agent) for agent in self.agents]), self._get_info()
 
@@ -919,14 +934,27 @@ class Warehouse(gym.Env):
                 continue
             shelf = self.shelfs[shelf_id - 1]
 
-            if shelf not in self.request_queue:
+            if shelf not in self.request_queue or shelf.depth > 0:
                 continue
             # a shelf was successfully delived.
             shelf_delivered = True
+            # release children dependency
+            self._release(shelf)
+            shelf.depth = None
             # remove from queue and replace it
             candidates = [s for s in self.shelfs if s not in self.request_queue]
             new_request = self.np_random.choice(candidates)
-            self.request_queue[self.request_queue.index(shelf)] = new_request
+            shelf_index = self.request_queue.index(shelf)
+
+            if self.dependency_prob > 0 and self.np_random.random() < self.dependency_prob:
+                parent_idx = self.np_random.choice(np.setdiff1d(range(len(self.request_queue)), shelf_index)) # exclude delivered index
+                parent = self.request_queue[parent_idx]
+                self.request_children.setdefault(parent, []).append(new_request)
+                new_request.depth = parent.depth + 1
+            else:
+                new_request.depth = 0
+
+            self.request_queue[shelf_index] = new_request
             # also reward the agents
             if self.reward_type == RewardType.GLOBAL:
                 rewards += 1
@@ -1051,6 +1079,15 @@ class Warehouse(gym.Env):
                 )
         return self.global_image
 
+    def _release(self, shelf):
+        """
+        Releases dependency from delivered shelf to its children
+        """
+        stack = list(self.request_children.pop(shelf, []))
+        while stack:
+            s = stack.pop()
+            s.depth -= 1
+            stack.extend(list(self.request_children.get(s, [])))
 
 if __name__ == "__main__":
     env = Warehouse(9, 8, 3, 10, 3, 1, 5, None, None, RewardType.GLOBAL)

@@ -54,11 +54,17 @@ _ORANGE = (255, 165, 0)
 _DARKORANGE = (255, 140, 0)
 _DARKSLATEBLUE = (72, 61, 139)
 _TEAL = (0, 128, 128)
+_DARKTEAL1 = (0, 98, 98)
+_DARKTEAL2 = (0, 68, 68)
+_DARKTEAL3 = (0, 38, 38)
 
 _BACKGROUND_COLOR = _WHITE
 _GRID_COLOR = _BLACK
 _SHELF_COLOR = _DARKSLATEBLUE
 _SHELF_REQ_COLOR = _TEAL
+_SHELF_DEPTH_1 = _DARKTEAL1
+_SHELF_DEPTH_2 = _DARKTEAL2
+_SHELF_DEPTH_3 = _DARKTEAL3
 _AGENT_COLOR = _DARKORANGE
 _AGENT_LOADED_COLOR = _RED
 _AGENT_DIR_COLOR = _BLACK
@@ -183,9 +189,17 @@ class Viewer(object):
         for shelf in env.shelfs:
             x, y = shelf.x, shelf.y
             y = self.rows - y - 1  # pyglet rendering is reversed
-            shelf_color = (
-                _SHELF_REQ_COLOR if shelf in env.request_queue else _SHELF_COLOR
-            )
+            match shelf.depth:
+                case None:
+                    shelf_color = _SHELF_COLOR
+                case 0:
+                    shelf_color = _SHELF_REQ_COLOR
+                case 1:
+                    shelf_color = _SHELF_DEPTH_1
+                case 2:
+                    shelf_color = _SHELF_DEPTH_2
+                case _:
+                    shelf_color = _SHELF_DEPTH_3
 
             batch.add(
                 4,
@@ -207,6 +221,45 @@ class Viewer(object):
                 ("c3B", 4 * shelf_color),
             )
         batch.draw()
+        # draw requested shelf indexes and dependencies only for dependency_prob > 0
+        if env.dependency_prob == 0: return
+        for shelf in env.shelfs:
+            if shelf not in env.request_queue: continue
+            x, y = shelf.x, shelf.y
+            y = self.rows - y - 1
+            label_x = x * (self.grid_size + 1) + (1 / 2) * (self.grid_size + 1) + 2
+            label_y = (self.grid_size + 1) * y + (1 / 2) * (self.grid_size + 1) + 2
+            dependency_x = label_x - 8
+            dependency_y = label_y - 9
+            label = pyglet.text.Label(
+                str(shelf.id),
+                font_name="Calibri",
+                font_size=11,
+                bold=False,
+                x=label_x,
+                y=label_y,
+                anchor_x="center",
+                anchor_y="center",
+                color=(*_WHITE, 255),
+            )
+            label.draw()
+            parent = ""
+            for s, children in env.request_children.items():
+                if shelf in children:
+                    parent = s.id
+                    break
+            dependency_label = pyglet.text.Label(
+                str(parent),
+                font_name="Calibri",
+                font_size=7,
+                bold=False,
+                x=dependency_x,
+                y=dependency_y,
+                anchor_x="center",
+                anchor_y="center",
+                color=(*_WHITE, 255),
+            )
+            dependency_label.draw()
 
     def _draw_goals(self, env):
         batch = pyglet.graphics.Batch()
