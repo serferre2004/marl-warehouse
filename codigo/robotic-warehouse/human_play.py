@@ -41,6 +41,18 @@ def parse_args():
         action="store_true",
         help="Display agent info per step",
     )
+    parser.add_argument(
+        "--dependency_prob",
+        type=float,
+        default=0.0,
+        help="Probability that a new request depends on a pending one",
+    )
+    parser.add_argument(
+        "--request_queue_size",
+        type=int,
+        default=None,
+        help="Number of simultaneously requested shelves (default: env's value)",
+    )
     return parser.parse_args()
 
 
@@ -52,8 +64,13 @@ class InteractiveRWAREEnv:
         env: str,
         max_steps,
         display_info: bool = True,
+        dependency_prob: float = 0.0,
+        request_queue_size: int = None,
     ):
-        self.env = gym.make(env, render_mode="human", max_steps=max_steps)
+        env_kwargs = {"dependency_prob": dependency_prob}
+        if request_queue_size is not None:
+            env_kwargs["request_queue_size"] = request_queue_size
+        self.env = gym.make(env, render_mode="human", max_steps=max_steps, **env_kwargs)
         self.n_agents = self.env.unwrapped.n_agents
         self.running = True
         self.current_agent_index = 0
@@ -182,4 +199,10 @@ class InteractiveRWAREEnv:
 
 if __name__ == "__main__":
     args = parse_args()
-    InteractiveRWAREEnv(env=args.env, max_steps=args.max_steps, display_info=args.display_info)
+    InteractiveRWAREEnv(
+        env=args.env,
+        max_steps=args.max_steps,
+        display_info=args.display_info,
+        dependency_prob=args.dependency_prob,
+        request_queue_size=args.request_queue_size,
+    )

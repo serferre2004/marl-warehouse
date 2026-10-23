@@ -34,7 +34,9 @@ def env_0():
 
     env.agents[0].carrying_shelf = env.shelfs[0]
 
+    env.request_queue[0].depth = None
     env.request_queue[0] = env.shelfs[0]
+    env.shelfs[0].depth = 0
     env._recalc_grid()
     return env
 

@@ -105,6 +105,7 @@ def main():
         f"env_args.request_queue_size={config['environment']['request_queue_size']}",
         f"env_args.sensor_range={config['environment']['sensor_range']}",
         f"env_args.msg_bits={config['environment']['msg_bits']}",
+        f"env_args.dependency_prob={config['environment'].get('dependency_prob', 0.0)}",
         f"env_args.reward_type={config['environment']['reward_type']}",
         f"env_args.observation_type={config['environment']['observation_type']}",
         #f"env_args.layout={config['environment']['layout']}",

@@ -65,6 +65,7 @@ env_args:
   request_queue_size: null
   sensor_range: null
   msg_bits: null
+  dependency_prob: 0.0
   reward_type: null
   observation_type: null
   layout: null
