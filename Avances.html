@@ -277,8 +277,8 @@
         <h2>Tareas realizadas</h2>
       </div>
       <ul class="tasks">
-        <li>Búsqueda de hiperparámetros para IA2C</li>
-        <li>Ejecución de experimentos IA2C para múltiples semillas</li>
+        <li>Experimentos en el escenario custom (4 agentes) con y sin comunicación entre agentes</li>
+        <li>Implementación de dependencias entre paquetes en el entorno</li>
       </ul>
     </section>
 
@@ -287,144 +287,49 @@
         <h2>Resultados</h2>
       </div>
       <div class="subsection">
-        <h3>Búsqueda de hiperparámetros con random search</h3>
-        La siguiente tabla muestra los hiperparámetros que se probaron en la búsqueda aleatoria para IA2C. Se realizaron 50 experimentos con diferentes combinaciones de hiperparámetros, y se evaluó el desempeño de cada uno en el entorno RWARE.
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="background-color: #497c72; border: 1px solid #f5f2eb;"></th>
-                <th colspan="6" style="text-align: center; background-color: #497c72; border: 1px solid #f5f2eb;">Hiperparámetros</th>
-                <th colspan="4" style="text-align: center; background-color: #497c72; border: 1px solid #f5f2eb;">Retorno</th>
-              </tr>
-              <tr>
-                <th data-key="trial" data-type="num">Exp</th>
-                <th data-key="lr" data-type="num">α</th>
-                <th data-key="gamma" data-type="num">γ</th>
-                <th data-key="grad_norm_clip" data-type="num">Clip del gradiente</th>
-                <th data-key="hidden_dim" data-type="num">Capa escondida</th>
-                <th data-key="batch_size" data-type="num">Tamaño del batch</th>
-                <th data-key="entropy_coef" data-type="num">Coeficiente de entropía</th>
-                <th data-key="max" data-type="num">Max</th>
-                <th data-key="mean" data-type="num">Media</th>
-                <th data-key="std" data-type="num">std</th>
-                <th data-key="last" data-type="num">Último</th>
-              </tr>
-            </thead>
-            <tbody>
-            <tr><td>1</td><td>0.00033818</td><td>0.97</td><td>20</td><td>256</td><td>16</td><td>0.013298</td><td>0.80833</td><td>0.2353</td><td>0.17945</td><td>0.76667</td></tr>
-            <tr><td>2</td><td>0.00040361</td><td>0.97</td><td>5</td><td>128</td><td>32</td><td>0.0013875</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>3</td><td>0.00046832</td><td>0.995</td><td>5</td><td>256</td><td>16</td><td>0.0020072</td><td>1.1104</td><td>0.35055</td><td>0.29377</td><td>0.83333</td></tr>
-            <tr><td>4</td><td>0.00025683</td><td>0.995</td><td>20</td><td>256</td><td>16</td><td>0.015317</td><td>0.82188</td><td>0.23603</td><td>0.17822</td><td>0.54375</td></tr>
-            <tr><td>5</td><td>0.00093407</td><td>0.995</td><td>10</td><td>64</td><td>16</td><td>0.02286</td><td>0.75312</td><td>0.2548</td><td>0.15418</td><td>0.73229</td></tr>
-            <tr><td>6</td><td>0.0001706</td><td>0.97</td><td>5</td><td>256</td><td>32</td><td>0.0033064</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>7</td><td>0.00022749</td><td>0.99</td><td>5</td><td>256</td><td>32</td><td>0.04744</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>8</td><td>0.00015369</td><td>0.97</td><td>20</td><td>256</td><td>32</td><td>0.042585</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>9</td><td>0.00054225</td><td>0.95</td><td>5</td><td>128</td><td>32</td><td>0.029204</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>10</td><td>0.00017571</td><td>0.97</td><td>5</td><td>256</td><td>32</td><td>0.045138</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>11</td><td>0.00020182</td><td>0.97</td><td>20</td><td>128</td><td>64</td><td>0.0017195</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>12</td><td>0.00020732</td><td>0.995</td><td>5</td><td>128</td><td>64</td><td>0.019486</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>13</td><td>0.00076198</td><td>0.99</td><td>5</td><td>128</td><td>32</td><td>0.007328</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>14</td><td>0.000154</td><td>0.995</td><td>20</td><td>64</td><td>16</td><td>0.029611</td><td>0.24792</td><td>0.13897</td><td>0.03448</td><td>0.17812</td></tr>
-            <tr><td>15</td><td>0.00016975</td><td>0.995</td><td>5</td><td>64</td><td>32</td><td>0.0036668</td><td>1.3823</td><td>0.89069</td><td>0.45183</td><td>1.3823</td></tr>
-            <tr><td>8</td><td>0.00099249</td><td>0.995</td><td>5</td><td>256</td><td>16</td><td>0.016639</td><td>1.5354</td><td>1.0315</td><td>0.44232</td><td>1.5354</td></tr>
-            <tr><td>9</td><td>0.00013007</td><td>0.99</td><td>5</td><td>128</td><td>64</td><td>0.0027907</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>16</td><td>0.00010296</td><td>0.95</td><td>10</td><td>64</td><td>32</td><td>0.024847</td><td>0.20104</td><td>0.13219</td><td>0.031301</td><td>0.15625</td></tr>
-            <tr><td>10</td><td>0.00065738</td><td>0.995</td><td>20</td><td>64</td><td>32</td><td>0.021908</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>11</td><td>0.00031914</td><td>0.995</td><td>5</td><td>128</td><td>32</td><td>0.0041927</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>17</td><td>0.00020697</td><td>0.95</td><td>5</td><td>128</td><td>32</td><td>0.014804</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>12</td><td>0.00037754</td><td>0.97</td><td>10</td><td>256</td><td>32</td><td>0.0049767</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>18</td><td>0.00077674</td><td>0.95</td><td>5</td><td>128</td><td>64</td><td>0.02688</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>13</td><td>0.00011542</td><td>0.99</td><td>20</td><td>64</td><td>32</td><td>0.0019422</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>14</td><td>0.00012624</td><td>0.97</td><td>10</td><td>256</td><td>32</td><td>0.0011409</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>19</td><td>0.0005185</td><td>0.99</td><td>10</td><td>256</td><td>32</td><td>0.0014496</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>15</td><td>0.0004826</td><td>0.99</td><td>20</td><td>128</td><td>64</td><td>0.0019069</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>16</td><td>0.0002921</td><td>0.995</td><td>20</td><td>256</td><td>32</td><td>0.03574</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>20</td><td>0.00090636</td><td>0.97</td><td>10</td><td>128</td><td>64</td><td>0.0015036</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>17</td><td>0.00077494</td><td>0.95</td><td>5</td><td>64</td><td>64</td><td>0.021261</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>21</td><td>0.00017188</td><td>0.995</td><td>20</td><td>128</td><td>64</td><td>0.005429</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>18</td><td>0.00054537</td><td>0.97</td><td>20</td><td>256</td><td>64</td><td>0.0031452</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>19</td><td>0.00057351</td><td>0.97</td><td>10</td><td>64</td><td>64</td><td>0.0098209</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>22</td><td>0.00063875</td><td>0.995</td><td>20</td><td>128</td><td>32</td><td>0.019609</td><td>0.092708</td><td>0.049226</td><td>0.017925</td><td>0.052083</td></tr>
-            <tr><td>20</td><td>0.00012856</td><td>0.99</td><td>20</td><td>128</td><td>64</td><td>0.01123</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>21</td><td>0.00059881</td><td>0.995</td><td>5</td><td>128</td><td>16</td><td>0.0013941</td><td>1.2396</td><td>0.68611</td><td>0.45016</td><td>1.1781</td></tr>
-            <tr><td>23</td><td>0.00074236</td><td>0.97</td><td>10</td><td>128</td><td>32</td><td>0.016115</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>22</td><td>0.00012895</td><td>0.97</td><td>20</td><td>64</td><td>64</td><td>0.005774</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>24</td><td>0.00013294</td><td>0.99</td><td>20</td><td>128</td><td>64</td><td>0.0013301</td><td>0.092708</td><td>0.049713</td><td>0.017364</td><td>0.05</td></tr>
-            <tr><td>23</td><td>0.00040768</td><td>0.995</td><td>10</td><td>128</td><td>64</td><td>0.0026982</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>24</td><td>0.00020704</td><td>0.995</td><td>20</td><td>128</td><td>16</td><td>0.03627</td><td>0.81042</td><td>0.19998</td><td>0.19891</td><td>0.675</td></tr>
-            <tr><td>25</td><td>0.00017509</td><td>0.95</td><td>20</td><td>128</td><td>32</td><td>0.0011721</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>25</td><td>0.00022696</td><td>0.95</td><td>10</td><td>256</td><td>64</td><td>0.00248</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>26</td><td>0.00051566</td><td>0.97</td><td>20</td><td>256</td><td>32</td><td>0.0015266</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>26</td><td>0.00013357</td><td>0.95</td><td>5</td><td>128</td><td>32</td><td>0.0010302</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>27</td><td>0.00083492</td><td>0.95</td><td>10</td><td>128</td><td>16</td><td>0.042966</td><td>3.6052</td><td>0.99601</td><td>1.07</td><td>3.125</td></tr>
-            <tr><td>28</td><td>0.00084125</td><td>0.995</td><td>5</td><td>128</td><td>64</td><td>0.0089738</td><td>0.17083</td><td>0.12093</td><td>0.029</td><td>0.088542</td></tr>
-            <tr><td>29</td><td>0.00065807</td><td>0.97</td><td>10</td><td>128</td><td>16</td><td>0.0016471</td><td>1.4052</td><td>0.75425</td><td>0.49103</td><td>1.3979</td></tr>
-            <tr><td>28</td><td>0.00030071</td><td>0.99</td><td>20</td><td>128</td><td>32</td><td>0.013832</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>30</td><td>0.00035263</td><td>0.99</td><td>20</td><td>256</td><td>64</td><td>0.047298</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>29</td><td>0.00044753</td><td>0.97</td><td>5</td><td>128</td><td>64</td><td>0.0013966</td><td>0.20833</td><td>0.11529</td><td>0.02913</td><td>0.091667</td></tr>
-            <tr><td>31</td><td>0.00010033</td><td>0.99</td><td>5</td><td>64</td><td>32</td><td>0.013036</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>32</td><td>0.00066563</td><td>0.99</td><td>5</td><td>128</td><td>32</td><td>0.0022851</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>30</td><td>0.00057538</td><td>0.95</td><td>20</td><td>256</td><td>64</td><td>0.024616</td><td>0.18542</td><td>0.11396</td><td>0.029842</td><td>0.17604</td></tr>
-            <tr><td>33</td><td>0.00011115</td><td>0.99</td><td>5</td><td>256</td><td>16</td><td>0.0056408</td><td>0.5125</td><td>0.20438</td><td>0.14769</td><td>0.29896</td></tr>
-            <tr><td>34</td><td>0.00032302</td><td>0.95</td><td>20</td><td>128</td><td>64</td><td>0.0016624</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>35</td><td>0.00059392</td><td>0.97</td><td>5</td><td>256</td><td>16</td><td>0.0055264</td><td>1.2312</td><td>0.69999</td><td>0.34172</td><td>1</td></tr>
-            <tr><td>36</td><td>0.00018653</td><td>0.97</td><td>10</td><td>128</td><td>64</td><td>0.0017848</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            <tr><td>37</td><td>0.00078409</td><td>0.97</td><td>20</td><td>128</td><td>16</td><td>0.0083527</td><td>2.0656</td><td>1.0431</td><td>0.57275</td><td>2.0656</td></tr>
-            <tr><td>38</td><td>0.00030438</td><td>0.97</td><td>10</td><td>64</td><td>64</td><td>0.0030328</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>39</td><td>0.00011459</td><td>0.97</td><td>5</td><td>64</td><td>16</td><td>0.010406</td><td>0.13958</td><td>0.071638</td><td>0.02454</td><td>0.051042</td></tr>
-            <tr><td>40</td><td>0.00071718</td><td>0.995</td><td>5</td><td>256</td><td>64</td><td>0.038473</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>41</td><td>0.00018431</td><td>0.97</td><td>10</td><td>256</td><td>64</td><td>0.005036</td><td>0.098958</td><td>0.045934</td><td>0.014933</td><td>0.046875</td></tr>
-            <tr><td>42</td><td>0.00017773</td><td>0.95</td><td>10</td><td>64</td><td>16</td><td>0.0021571</td><td>0.24167</td><td>0.1121</td><td>0.045789</td><td>0.13958</td></tr>
-            <tr><td>43</td><td>0.00040403</td><td>0.99</td><td>5</td><td>64</td><td>16</td><td>0.0018039</td><td>0.87812</td><td>0.2549</td><td>0.20874</td><td>0.86354</td></tr>
-            <tr><td>44</td><td>0.0003296</td><td>0.95</td><td>20</td><td>256</td><td>16</td><td>0.022119</td><td>1.7531</td><td>0.75775</td><td>0.5302</td><td>1.3385</td></tr>
-            <tr><td>45</td><td>0.00018101</td><td>0.995</td><td>10</td><td>128</td><td>16</td><td>0.0045898</td><td>0.32812</td><td>0.13244</td><td>0.082591</td><td>0.32812</td></tr>
-            <tr><td>46</td><td>0.00038961</td><td>0.97</td><td>10</td><td>64</td><td>16</td><td>0.0030428</td><td>0.73646</td><td>0.18904</td><td>0.15396</td><td>0.68229</td></tr>
-            <tr><td>47</td><td>0.0003096</td><td>0.99</td><td>5</td><td>64</td><td>64</td><td>0.014249</td><td>0.095833</td><td>0.053147</td><td>0.017938</td><td>0.055208</td></tr>
-            <tr><td>48</td><td>0.00063765</td><td>0.995</td><td>10</td><td>256</td><td>16</td><td>0.0047997</td><td>1.399</td><td>0.69112</td><td>0.53684</td><td>1.3469</td></tr>
-            <tr><td>49</td><td>0.00050535</td><td>0.99</td><td>20</td><td>128</td><td>16</td><td>0.015109</td><td>1.7937</td><td>0.9987</td><td>0.61464</td><td>1.4042</td></tr>
-            <tr><td>50</td><td>0.00060423</td><td>0.995</td><td>5</td><td>128</td><td>64</td><td>0.0034964</td><td>0.092708</td><td>0.049418</td><td>0.017271</td><td>0.027083</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="subsection">
-        <h3>Ejecución mejor resultado</h3>
-        <div>Semilla 3 </div>
-        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/seed3/figures/learning_curve.png" width="90%">
-        <div>Semilla 22 </div>
-        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/seed22/figures/learning_curve.png" width="90%">
-        <div>Semilla 42 </div>
-        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/seed42/figures/learning_curve.png" width="90%">
-        <div>Semilla 138 </div>
-        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/seed138/figures/learning_curve.png" width="90%">
-        <div>Semilla 2026 </div>
-        <img src="./codigo/experiments/results/sacred/ia2c/rware_rware-tiny-2ag-v2/seed2026/figures/learning_curve.png" width="90%">
+        <h3>Escenario custom: vanilla vs comms (IA2C)</h3>
+        <div>IA2C en un almacén de 4 agentes, con y sin mensajes de 3 bits entre agentes (5 semillas, 40 millones de pasos).</div>
+        <img src="./codigo/analysis/marl_pipeline/custom_figures/current/ia2c_vanilla_vs_comms_return.png" width="90%">
+        <div>Con comunicación el aprendizaje es más lento y la recompensa final queda algo por debajo.</div>
+        <img src="./codigo/analysis/marl_pipeline/custom_figures/current/ia2c_vanilla_vs_comms_collisions.png" width="90%">
+        <div>Las colisiones convergen a valores similares en ambos casos.</div>
+        <div>Los demás algoritmos se están repitiendo por un error de configuración.</div>
       </div>
       <div class="subsection">
         <h3>Ejecuciones</h3>
+        <div>Mejor modelo de cada variante.</div>
         <div style="display: flex; flex-direction: row;">
           <div style="display: flex; flex-direction: column; align-items: center; margin-right: 20px;">
-            Semilla 3
+            Vanilla
             <video autoplay loop muted width="99%" height="99%" controls>
-              <source src="./codigo/ia2c_seed3.mp4" type="video/mp4">
-              Tu navegador no soporta el elemento de vídeo.
-            </video>
-          </div>
-          <div  style="display: flex; flex-direction: column; align-items: center; margin-right: 20px;">
-            Semilla 138
-            <video autoplay loop muted width="99%" height="99%" controls>
-              <source src="./codigo/ia2c_seed138.mp4" type="video/mp4">
+              <source src="./codigo/ia2c_custom_vanilla.mp4" type="video/mp4">
               Tu navegador no soporta el elemento de vídeo.
             </video>
           </div>
           <div style="display: flex; flex-direction: column; align-items: center; margin-right: 20px;">
-            Semilla 2026
+            Comms
             <video autoplay loop muted width="99%" height="99%" controls>
-              <source src="./codigo/ia2c_seed2026.mp4" type="video/mp4">
+              <source src="./codigo/ia2c_custom_comms.mp4" type="video/mp4">
               Tu navegador no soporta el elemento de vídeo.
             </video>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="entry-head">
+        <h2>Implementación de dependencias entre paquetes</h2>
+      </div>
+      <div class="subsection">
+        <div>Un paquete solicitado puede depender de otro y solo se entrega cuando el otro ya fue entregado. Cada nueva solicitud depende de un paquete pendiente con probabilidad p; con p = 0 el entorno es el original.</div>
+        <div>Los agentes observan la profundidad de cada paquete en la cadena de dependencias. En el render, el verde es más oscuro a mayor profundidad y el número pequeño indica el paquete del que depende.</div>
+        <div>Ejemplo con p = 0.5 (política entrenada sin dependencias):</div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <video autoplay loop muted width="60%" controls>
+            <source src="./codigo/dependencias_ejemplo.mp4" type="video/mp4">
+            Tu navegador no soporta el elemento de vídeo.
+          </video>
         </div>
       </div>
     </section>
@@ -434,61 +339,13 @@
         <h2>Próximos pasos</h2>
       </div>
       <div class="write-area">
-        <p>Random search de parámetros sobre IPPO</p>
         <p>Exploración de otros algoritmos</p>
+        <p>Repetir IPPO, MAA2C y MAPPO en el escenario custom (vanilla y comms) con sus configuraciones corregidas</p>
+        <p>Entrenar los algoritmos en el escenario con dependencias y comparar su desempeño</p>
       </div>
     </section>
 
   </div>
 
-  <script>
-    (function () {
-      const table = document.querySelector('.table-wrap table');
-      const tbody = table.querySelector('tbody');
-      // Solo los th con data-key: excluye la fila de agrupación (Hiperparámetros / Retorno)
-      const headers = table.querySelectorAll('thead th[data-key]');
-      const VISIBLE_COUNT = 15;
-
-      let currentSort = { index: -1, dir: 1 };
-
-      function applyVisibility() {
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        rows.forEach((row, i) => {
-          row.style.display = i < VISIBLE_COUNT ? '' : 'none';
-        });
-      }
-
-      // estado inicial: solo se ven las primeras 15 filas (orden original)
-      applyVisibility();
-
-      headers.forEach((th, index) => {
-        th.addEventListener('click', () => {
-          const rows = Array.from(tbody.querySelectorAll('tr'));
-          const dir = (currentSort.index === index) ? -currentSort.dir : 1;
-
-          rows.sort((rowA, rowB) => {
-            const cellA = rowA.children[index].textContent.trim();
-            const cellB = rowB.children[index].textContent.trim();
-            const numA = parseFloat(cellA);
-            const numB = parseFloat(cellB);
-            const bothNumeric = !isNaN(numA) && !isNaN(numB);
-
-            if (bothNumeric) {
-              return (numA - numB) * dir;
-            }
-            return cellA.localeCompare(cellB) * dir;
-          });
-
-          rows.forEach(row => tbody.appendChild(row));
-          applyVisibility();
-
-          headers.forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
-          th.classList.add(dir === 1 ? 'sorted-asc' : 'sorted-desc');
-
-          currentSort = { index, dir };
-        });
-      });
-    })();
-  </script>
 </body>
 </html>
