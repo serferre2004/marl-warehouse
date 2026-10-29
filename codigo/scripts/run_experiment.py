@@ -108,7 +108,6 @@ def main():
         f"env_args.dependency_prob={config['environment'].get('dependency_prob', 0.0)}",
         f"env_args.reward_type={config['environment']['reward_type']}",
         f"env_args.observation_type={config['environment']['observation_type']}",
-        #f"env_args.layout={config['environment']['layout']}",
 
         f"seed={config['seed']}",
 
@@ -134,6 +133,11 @@ def main():
         # Results
         f"local_results_path={results_path}",
     ]
+
+    # El layout es opcional: las configs sin él (p. ej. small) usan el del escenario registrado
+    layout = config["environment"].get("layout")
+    if layout:
+        command.append(f"env_args.layout={layout}")
 
     keys_setted = ["algorithm", "environment", "training", "logging", "checkpoint", "evaluation", "reward", "results", "seed", "time_limit", "name"]
     for key in keys_setted:
